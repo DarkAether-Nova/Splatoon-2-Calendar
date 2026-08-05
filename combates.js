@@ -1,65 +1,73 @@
 // =========================================================================
-// CONFIGURACIÓN DE ROTACIÓN GLOBAL
+// CONFIGURACIÓN DE ROTACIÓN GLOBAL Y DATOS ONLINE
 // =========================================================================
 
 // Secuencia de modos competitivos y de liga por rotación
 const rankedModesSequence = ["splatZones", "towerControl", "rainmaker", "clamBlitz"];
 
+// Control de activación de Splatfest (true = activo / false = inactivo)
+// Modificado a 'false' por defecto ya que no hay datos de Splatfest en rotamapas.js
+let isSplatfestActive = false; 
+
+// Almacén global para las rotaciones
+let onlineRotationsData = {
+    turfWarRotations: [],
+    rankedBattleRotations: [],
+    leagueBattleRotations: [],
+    splatfestRotations: []
+};
 
 // =========================================================================
-// CONTROL DE ACTIVACIÓN DE SPLATFEST (true = activo / false = inactivo)
-
-let isSplatfestActive = true;
-
+// 1. CARGAR DATOS DESDE EL ARCHIVO LOCAL (rotamapas.js)
 // =========================================================================
 
-// =========================================================================
-// 1. ROTACIONES PERSONALIZADAS
-// =========================================================================
+async function fetchOnlineRotations() {
+    try {
+        // Verificamos si la variable rotamapasData del otro archivo se cargó correctamente
+        if (typeof rotamapasData !== 'undefined') {
+            const data = rotamapasData;
+            
+            // Mapeamos los datos de rotamapasData a la estructura que usa tu interfaz
+            if (data.regular) {
+                onlineRotationsData.turfWarRotations = data.regular.map(rot => ({
+                    map1: rot.stages[0],
+                    map2: rot.stages[1],
+                    rule: rot.rule
+                }));
+            }
+            if (data.ranked) {
+                onlineRotationsData.rankedBattleRotations = data.ranked.map(rot => ({
+                    map1: rot.stages[0],
+                    map2: rot.stages[1],
+                    rule: rot.rule
+                }));
+            }
+            if (data.league) {
+                onlineRotationsData.leagueBattleRotations = data.league.map(rot => ({
+                    map1: rot.stages[0],
+                    map2: rot.stages[1],
+                    rule: rot.rule
+                }));
+            }
+            
+            // Si en algún momento añades splatfest al JSON, se mapeará aquí.
+            if (data.splatfest) {
+                onlineRotationsData.splatfestRotations = data.splatfest.map(rot => ({
+                    map1: rot.stages[0],
+                    map2: rot.stages[1],
+                    rule: rot.rule
+                }));
+            }
+        } else {
+            console.warn("No se encontró rotamapasData. Asegúrate de incluir rotamapas.js antes de este script en tu HTML.");
+        }
 
-const turfWarRotations = [
-    {
-        map1: { name: "Ancho-V Games", image: "maps/800px-S2_Stage_Ancho-V_Games.png" },
-        map2: { name: "Arowana Mall", image: "maps/800px-S2_Stage_Arowana_Mall.png" }
-    },
-    {
-        map1: { name: "Blackbelly Skatepark", image: "maps/800px-S2_Stage_Blackbelly_Skatepark.png" },
-        map2: { name: "Camp Triggerfish", image: "maps/800px-S2_Stage_Camp_Triggerfish.png" }
+        // Una vez cargados, actualizamos la interfaz
+        refreshAllRotations();
+    } catch (error) {
+        console.error("Error procesando los datos de rotaciones locales:", error);
     }
-];
-
-const rankedBattleRotations = [
-    {
-        map1: { name: "Goby Arena", image: "maps/800px-S2_Stage_Goby_Arena.png" },
-        map2: { name: "Kelp Dome", image: "maps/800px-S2_Stage_Kelp_Dome.png" }
-    },
-    {
-        map1: { name: "Moray Towers", image: "maps/800px-S2_Stage_Moray_Towers.png" },
-        map2: { name: "New Albacore Hotel", image: "maps/800px-S2_Stage_New_Albacore_Hotel.png" }
-    }
-];
-
-const leagueBattleRotations = [
-    {
-        map1: { name: "Piranha Pit", image: "maps/800px-S2_Stage_Piranha_Pit.png" },
-        map2: { name: "Port Mackerel", image: "maps/800px-S2_Stage_Port_Mackerel.png" }
-    },
-    {
-        map1: { name: "Snapper Canal", image: "maps/800px-S2_Stage_Snapper_Canal.png" },
-        map2: { name: "The Reef", image: "maps/800px-S2_Stage_The_Reef.png" }
-    }
-];
-
-const splatfestRotations = [
-    {
-        map1: { name: "Piranha Pit", image: "maps/800px-S2_Stage_Piranha_Pit.png" },
-        map2: { name: "Port Mackerel", image: "maps/800px-S2_Stage_Port_Mackerel.png" }
-    },
-    {
-        map1: { name: "Snapper Canal", image: "maps/800px-S2_Stage_Snapper_Canal.png" },
-        map2: { name: "The Reef", image: "maps/800px-S2_Stage_The_Reef.png" }
-    }
-];
+}
 
 
 // =========================================================================
@@ -79,13 +87,12 @@ function getCurrentSlotStartTime() {
 }
 
 function getRotationSlot() {
+    // Cada bloque de rotación dura exactamente 2 horas (7,200,000 milisegundos)
+    // Usamos la hora actual enepoch dividida entre la duración del bloque para sincronizar perfectamente con el tiempo real.
     const now = Date.now();
-    // Utiliza un punto de referencia fijo con hora local 00:00
-    const anchorDate = new Date(2026, 0, 1, 0, 0, 0, 0).getTime();
-    const elapsed = now - anchorDate;
-    return Math.floor(elapsed / (2 * 60 * 60 * 1000));
+    const slotDuration = 2 * 60 * 60 * 1000;
+    return Math.floor(now / slotDuration);
 }
-
 
 // =========================================================================
 // 3. ACTUALIZAR ROTACIÓN DE CADA MODO EN PANTALLA PRINCIPAL
@@ -184,10 +191,10 @@ function openUpcomingModal(mode) {
     if (!modal || !container) return;
 
     let rotationsArray = [];
-    if (mode === "friendly") rotationsArray = turfWarRotations;
-    else if (mode === "ranked") rotationsArray = rankedBattleRotations;
-    else if (mode === "league") rotationsArray = leagueBattleRotations;
-    else if (mode === "splatfest") rotationsArray = splatfestRotations;
+    if (mode === "friendly") rotationsArray = onlineRotationsData.turfWarRotations;
+    else if (mode === "ranked") rotationsArray = onlineRotationsData.rankedBattleRotations;
+    else if (mode === "league") rotationsArray = onlineRotationsData.leagueBattleRotations;
+    else if (mode === "splatfest") rotationsArray = onlineRotationsData.splatfestRotations;
 
     if (rotationsArray.length === 0) return;
 
@@ -256,18 +263,18 @@ function formatDateHour(date) {
 // =========================================================================
 
 function refreshAllRotations() {
-    updateModeRotation(turfWarRotations, "f", "friendly-timer");
-    updateModeRotation(rankedBattleRotations, "r", "ranked-timer");
-    updateModeRotation(leagueBattleRotations, "l", "league-timer");
+    updateModeRotation(onlineRotationsData.turfWarRotations, "f", "friendly-timer");
+    updateModeRotation(onlineRotationsData.rankedBattleRotations, "r", "ranked-timer");
+    updateModeRotation(onlineRotationsData.leagueBattleRotations, "l", "league-timer");
 
     // Control dinámico de activación/visibilidad para Splatfest
     const sfClosedBanner = document.getElementById("splatfest-closed-banner");
     const sfContainer = document.getElementById("splatfest-container");
 
-    if (isSplatfestActive && splatfestRotations && splatfestRotations.length > 0) {
+    if (isSplatfestActive && onlineRotationsData.splatfestRotations && onlineRotationsData.splatfestRotations.length > 0) {
         if (sfClosedBanner) sfClosedBanner.style.display = "none";
         if (sfContainer) sfContainer.style.display = "block";
-        updateModeRotation(splatfestRotations, "sf", "splatfest-timer");
+        updateModeRotation(onlineRotationsData.splatfestRotations, "sf", "splatfest-timer");
     } else {
         if (sfClosedBanner) sfClosedBanner.style.display = "block";
         if (sfContainer) sfContainer.style.display = "none";
@@ -533,7 +540,11 @@ function changeLanguage() {
 
 document.addEventListener("DOMContentLoaded", () => {
     changeLanguage();
-    refreshAllRotations();
+    
+    // Llamamos a los datos locales al iniciar la página
+    fetchOnlineRotations();
+    
+    // Temporizador principal para refrescar los relojes en pantalla cada segundo
     setInterval(refreshAllRotations, 1000);
 
     // Cerrar modal al hacer clic fuera
