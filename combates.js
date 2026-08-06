@@ -23,7 +23,7 @@ let onlineRotationsData = {
 async function fetchOnlineRotations() {
     try {
         const targetUrl = "https://nextendo.network/api/splatoon2/rotation";
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
         const response = await fetch(proxyUrl);
         
