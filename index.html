@@ -8,11 +8,11 @@
     <style>
         @font-face {
             font-family: 'Splatfont2';
-            src: url('Splatfont2.ttf') format('truetype');
+            src: url('BlitzBold.otf') format('truetype');
         }
 
         :root {
-            --bg-dark: #1b1b1b;
+            --bg-dark: #222222;
             --text-white: #ffffff;
         }
 
@@ -22,565 +22,536 @@
             background-color: var(--bg-dark);
             background-image: url('backgraund.png');
             background-repeat: repeat;
-            background-size: auto;
+            background-size: 1080px;
+            background-attachment: fixed;
             font-family: 'Splatfont2', Arial, sans-serif;
             color: var(--text-white);
             overflow-x: hidden;
         }
 
-body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-dark);
-            background-image: url('backgraund.png');
-            background-repeat: repeat;
-            background-size: auto;
-            font-family: 'Splatfont2', Arial, sans-serif;
-            color: var(--text-white);
-            overflow-x: hidden;
-            /* Sombra negra para todo el texto de la página */
-            text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.9);
+        #page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #222222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: #fff;
+            font-size: 1.5rem;
+            transition: opacity 0.3s ease;
         }
 
         header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            padding: 25px 40px 10px 40px;
+            align-items: center;
+            padding: 20px 40px;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: transparent;
+            border-bottom: none;
         }
 
         .header-left h1 {
             font-family: 'Splatfont2', sans-serif;
-            font-size: 2.8rem;
+            font-size: 2.2rem;
             margin: 0;
             letter-spacing: 1px;
-            text-shadow: 3px 3px 0px #000;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
         }
 
-[id$="-timer"] {
-    font-size: 1.0rem !important;
-}
-        .lang-selector select {
-            background: #222;
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn, .lang-selector select {
+            background: rgba(0, 0, 0, 0.4);
             color: #fff;
-            border: 2px solid #555;
-            padding: 6px 12px;
-            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
             font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
             cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
         }
 
-        /* Contenedor principal en formato de columna vertical */
+        .nav-btn:hover, .lang-selector select:hover {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        #languageSelect {
+            font-size: 1rem !important;
+            padding: 8px 16px !important;
+        }
+
+        #languageSelect option {
+            background: #333;
+            color: #fff;
+        }
+
         .main-container {
-            max-width: 1200px;
-            margin: 20px auto;
+            max-width: 1700px;
+            margin: 20px auto 40px auto;
             padding: 0 20px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 40px;
         }
 
-
-#languageSelect {
-    font-size: 1.2rem !important;      /* Aumenta el tamaño del texto */
-    padding: 8px 16px !important;      /* Hace el botón más ancho y alto por dentro */
-    border-radius: 8px;                /* Redondea los bordes */
-    cursor: pointer;                   /* Cambia el puntero al pasar el ratón */
-}
-
-/* Tamaño del texto dentro de las opciones desplegables */
-#languageSelect option {
-    font-size: 1.1rem;
-    padding: 6px;
-}
-        /* Grilla para organizar 2 tarjetas arriba y 2 abajo */
         .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(300px, 1fr));
-            gap: 25px;
+            display: flex;
             justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
         }
 
         .splat-card {
-            border-radius: 24px;
-            padding: 20px 15px 15px 15px;
+            width: 520px;
+            border-radius: 22px;
+            padding: 20px 24px;
             position: relative;
             box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-            border: 4px solid #111;
-            margin-top: 15px;
             box-sizing: border-box;
-        }
-
-        .splat-card::before {
-            content: '';
-            position: absolute;
-            top: -22px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 36px;
-            height: 18px;
-            background: #111;
-            border-radius: 6px 6px 0 0;
-            border: 3px solid #333;
-            border-bottom: none;
+            border: 2px solid rgba(0,0,0,0.3);
+            overflow: hidden;
         }
 
         .card-green { 
-            background-color: #1faa1f;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(0, 0, 0, 0.08) 15px, rgba(0, 0, 0, 0.08) 30px);
+            background: repeating-linear-gradient( 45deg, #1ddb1d, #1ddb1d 22px, #16c816 22px, #16c816 44px );
+            transform: rotate(-1.2deg);
         }
         .card-orange { 
-            background-color: #e64d00;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(0, 0, 0, 0.08) 15px, rgba(0, 0, 0, 0.08) 30px);
+            background: repeating-linear-gradient( 45deg, #ff7100, #ff7100 22px, #e86600 22px, #e86600 44px );
+            transform: rotate(0.8deg);
+            margin-top: 10px;
         }
         .card-pink { 
-            background-color: #e60073;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(0, 0, 0, 0.08) 15px, rgba(0, 0, 0, 0.08) 30px);
-        }
-        .card-purple { 
-            background-color: #7b2cbf;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(0, 0, 0, 0.08) 15px, rgba(0, 0, 0, 0.08) 30px);
+            background: repeating-linear-gradient( 45deg, #f21379, #f21379 22px, #d80f6a 22px, #d80f6a 44px );
+            transform: rotate(-0.6deg);
         }
         
         .card-salmon { 
-            background-color: #d95c12;
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 15px, rgba(0, 0, 0, 0.08) 15px, rgba(0, 0, 0, 0.08) 30px);
-            width: 100%; 
+            background: repeating-linear-gradient( 45deg, #ff7a1f, #ff7a1f 22px, #e06612 22px, #e06612 44px );
+            width: 780px; 
+            max-width: 100%;
             margin: 0 auto; 
-            padding: 22px 25px;
+            transform: rotate(0.3deg);
+            padding: 20px 25px;
         }
 
-        .card-header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        .hanger-hole {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 10px;
+            background-color: var(--bg-dark);
+            border-radius: 22px;
+            z-index: 111;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.8);
+        }
+        .hanger-hole::before {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 6px;
+            background-color: var(--bg-dark);
+            border-radius: 12px 12px 0 0;
+            box-shadow: inset 0 3px 3px rgba(0,0,0,0.8);
         }
 
         .card-header-title {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 2.35rem;
-            margin: 0;
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.4);
+            gap: 12px;
+            font-size: 1.85rem;
+            margin: 12px 0 16px 0;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
             letter-spacing: 0.5px;
-        }
-
-        .status-badge {
-            background-color: #1a8cff;
-            color: white;
-            padding: 6px 16px;
-            border-radius: 14px;
-            font-size: 0.95rem;
-            border: 2px solid #000;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
-            letter-spacing: 0.5px;
-        }
-        .status-badge.open {
-            background-color: #239b56;
-        }
-        .status-badge.closed {
-            background-color: #e74c3c;
+            padding: 0 4px;
+            white-space: nowrap;
         }
 
         .mode-icon {
-            width: 32px;
-            height: 32px;
+            width: 38px;
+            height: 38px;
             object-fit: contain;
+            filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.4));
         }
 
-        .schedule-section {
-            background: rgba(0, 0, 0, 0.45);
+        .current-section {
+            background: rgba(0, 0, 0, 0.65);
             border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 12px;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.4);
-            border: 2px solid rgba(0,0,0,0.2);
+            padding: 14px;
+            margin-bottom: 18px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
         }
 
-        .schedule-section-header {
+        .current-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 1rem;
-            margin-bottom: 8px;
-            color: #fff;
-        }
-
-        .time-label {
+            margin-bottom: 10px;
             font-size: 1.1rem;
-            color: #f0f0f0;
-            font-weight: normal;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            font-weight: bold;
         }
 
-        .maps-grid {
+        .current-maps-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 12px;
         }
 
         .map-box {
-            background: #111;
-            border-radius: 10px;
+            position: relative;
+            border-radius: 12px;
             overflow: hidden;
-            border: 2px solid #000;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            aspect-ratio: 16/9;
+            box-shadow: 0 11px 13px rgba(0,0,0,0.4);
+            background: #000;
+            border: 2px solid rgba(255, 255, 255, 0.15);
         }
 
         .map-img {
             width: 100%;
-            aspect-ratio: 16/9;
+            height: 100%;
             object-fit: cover;
             display: block;
+            border-radius: 8px;
         }
 
         .map-name {
+            position: absolute;
+            bottom: 2px;
+            right: 3px;
             background: rgba(0, 0, 0, 0.85);
             color: #fff;
-            text-align: center;
-            padding: 5px 3px;
-            font-size: 1.0rem;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
             margin: 0;
+            text-shadow: none;
             white-space: nowrap;
+            max-width: 90%;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .btn-upcoming {
-            background: rgba(0,0,0,0.35);
+        .next-section {
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 5px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .proximo-tag {
+            background-color: #6a11e8;
             color: white;
-            border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 20px;
-            padding: 5px 12px;
+            padding: 5px 15px;
+            border-radius: 0 14px 14px 0;
+            display: inline-block;
+            font-size: 1.15rem;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
+            margin-left: -28px; 
+            position: relative;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+            margin-bottom: 12px;
+        }
+
+        .next-content-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            padding: 0 2px;
+            margin-bottom: 12px;
+        }
+
+        .next-rule-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .next-timer-hours {
+            font-size: 1rem;
+            color: #ffea00;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+        }
+
+        .next-time-range {
+            font-size: 1.05rem;
+            font-weight: bold;
+        }
+
+        .btn-upcoming {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 10px 24px;
             font-family: 'Splatfont2', sans-serif;
-            font-size: 1.0rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            margin: 0 auto;
+            margin: 20px auto 5px auto;
             cursor: pointer;
-            text-decoration: none;
             width: fit-content;
             transition: background 0.2s;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .btn-upcoming:hover {
-            background: rgba(0,0,0,0.6);
+            background: rgba(255, 255, 255, 0.4);
         }
 
-        .closed-banner {
-            background-color: rgba(0, 0, 0, 0.5);
-            color: #ffffff;
-            text-align: center;
-            padding: 20px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 16px;
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            margin: 10px 0;
-        }
-
-        .salmon-current-content {
+        .salmon-card-header {
             display: flex;
-            gap: 20px;
+            justify-content: space-between;
             align-items: center;
+            padding: 0 4px;
+            margin: 12px 0 16px 0;
         }
 
-        .salmon-current-left {
-            flex: 1;
+        .status-badge {
+            background-color: #333;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 2px solid rgba(0,0,0,0.5);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .status-badge.open { background-color: #28b843; }
+
+        .salmon-current-horizontal {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
         }
 
         .salmon-current-map-container {
             position: relative;
-            border-radius: 10px;
+            width: 180px;
+            min-width: 180px;
+            border-radius: 8px;
             overflow: hidden;
-            border: 2px solid #000;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            background: #000;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            aspect-ratio: 16/9;
         }
 
         .salmon-current-map-img {
             width: 100%;
-            height: 130px;
+            height: 100%;
             object-fit: cover;
             display: block;
         }
 
-        .salmon-current-right {
-            flex: 1.1;
+        .salmon-current-info {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-
-        .salmon-weapons-title {
-            font-size: 0.95rem;
-            color: #ffd1b3;
-            margin: 0;
-            text-shadow: 1px 1px 0px #000;
+            gap: 4px;
+            flex-grow: 1;
         }
 
         .salmon-weapons-row {
             display: flex;
             gap: 8px;
+            margin-top: 4px;
         }
 
+        /* Iconos de armas con tamaño aumentado a 60px */
         .weapon-item {
-            width: 70px;
-            height: 70x;
-            background: #111;
-            border-radius: 10px;
-            border: 2px solid #000;
-            overflow: hidden;
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            padding: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.1);
         }
 
         .weapon-item img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.8));
         }
 
-        .salmon-closed-message {
-            text-align: center;
-            padding: 30px;
-            font-size: 1.2rem;
-            color: #ffcccc;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            border: 2px dashed rgba(255,255,255,0.2);
-        }
-
-        .salmon-next-item {
+        .salmon-next-row-clean {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 10px;
             padding: 8px 12px;
             margin-bottom: 8px;
-            border: 2px solid rgba(0,0,0,0.2);
-        }
-
-        .salmon-next-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .salmon-next-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .salmon-next-thumb {
-            width: 75px;
-            height: 42px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 2px solid #000;
-        }
-
-        .salmon-next-details {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .salmon-next-time {
+            border: 2px solid rgba(255, 255, 255, 0.08);
             font-size: 0.9rem;
+            gap: 10px;
+        }
+
+        .salmon-next-time-text {
             color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+            font-weight: bold;
+            flex-grow: 1;
         }
 
-        .salmon-next-countdown {
-            font-size: 0.8rem;
-            color: #ffaa55;
-        }
-
-        .salmon-next-weapons {
-            display: flex;
-            gap: 5px;
-        }
-
-        .salmon-mini-weapon {
-            width: 70px;
-            height: 70px;
-            background: #111;
-            border-radius: 6px;
-            border: 1px solid #000;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .salmon-mini-weapon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-/* Aumentar tamaño de fecha actual y tiempo restante */
-        #salmon-time {
-            font-size: 1rem;
-        }
-
-        #salmon-restante {
-            font-size: 1.05rem !important; /* El !important sobrescribe el estilo inline del HTML */
-        }
-
-        /* Aumentar tamaño de detalles en las rotaciones siguientes */
-        .salmon-next-time {
-            font-size: 1.15rem;
-        }
-
-        .salmon-next-countdown {
-            font-size: 1rem;
-        }
-
-        /* (Opcional) Aumentar tamaño de la miniatura si el texto se ajusta mucho */
-        .salmon-next-thumb {
-            width: 90px;
-            height: 50px;
+        .salmon-next-cd-text {
+            color: #ffea00;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+            white-space: nowrap;
         }
 
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.85);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
+        
         .modal-content {
-            background: #222;
-            border: 3px solid #444;
-            padding: 25px;
-            border-radius: 15px;
-            width: 500px;
+            background: #2a2a2a;
+            border: 2px solid #555;
+            padding: 30px;
+            border-radius: 20px;
+            width: 600px;
             max-width: 90%;
             max-height: 85vh;
             overflow-y: auto;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-        }
-        .modal-content h3 {
-            margin-top: 0;
-            font-size: 1.4rem;
-        }
-        .close-modal {
-            background: #e64d00;
-            color: #fff;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Splatfont2', sans-serif;
-            font-size: 0.9rem;
-            transition: 0.2s;
-            margin-top: 15px;
-        }
-        .close-modal:hover {
-            background: #ff5714;
-        }
-        .modal-rotation-item {
-            background: rgba(0, 0, 0, 0.4);
-            border: 2px solid #333;
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 10px;
-            text-align: left;
-        }
-        .modal-time-slot {
-            font-size: 0.9rem;
-            color: #ffaa55;
-            margin-bottom: 8px;
-        }
-        .modal-maps-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .modal-map-preview {
-            background: #111;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid #000;
-        }
-        .modal-map-preview img {
-            width: 100%;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-            display: block;
-        }
-        .modal-map-preview p {
-            background: rgba(0,0,0,0.8);
-            font-size: 1.0rem;
-            margin: 0;
-            padding: 4px;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            box-shadow: 0 10px 30px #000;
+            background-image: url('backgraund.png');
+            background-repeat: repeat;
         }
 
-        @media(max-width: 850px) {
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-            .salmon-current-content {
-                flex-direction: column;
-            }
-            .salmon-next-item {
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
-            }
+        .modal-content h3 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .modal-rotation-block {
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        #modalListContainer img {
+            width: 500px !important;
+            height: 281px !important;
+            max-width: 100% !important;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 8px auto 4px auto;
+            display: block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .close-modal {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 1.1rem;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        .close-modal:hover { background: rgba(255, 255, 255, 0.4); }
+
+        @media(max-width: 1650px) {
+            .cards-grid { flex-direction: column; align-items: center; }
+            .splat-card { width: 100%; max-width: 580px; transform: none !important; }
         }
     </style>
 </head>
 <body>
 
+    <div id="page-loader">Cargando rotaciones...</div>
+
     <header>
         <div class="header-left">
             <h1 id="main-title">NEXTENDO NETWORK / SPLATOON 2</h1>
         </div>
-        <div class="lang-selector">
-            <select id="languageSelect" onchange="changeLanguage()">
-                <option value="es">Español</option>
-                <option value="en">English</option>
-                <option value="it">Italiano</option>
-                <option value="pt">Português</option>
-            </select>
+        <div class="header-right">
+            <div class="nav-buttons-container">
+                <a href="partidas_liga.html" class="nav-btn">Mas informacion</a>
+                <a href="partidas_splatfest.html" class="nav-btn">Splatfest</a>
+            </div>
+            <div class="lang-selector">
+                <select id="languageSelect" onchange="changeLanguage()">
+                    <option value="es">Español</option>
+                    <option value="en">English</option>
+                    <option value="it">Italiano</option>
+                    <option value="pt">Português</option>
+                </select>
+            </div>
         </div>
     </header>
 
     <div class="main-container">
 
-        <!-- GRID PARA LAS 4 CARTAS (2 Arriba y 2 Abajo) -->
         <div class="cards-grid">
 
             <!-- 1. COMBATE AMISTOSO -->
             <div class="splat-card card-green">
+                <div class="hanger-hole"></div>
                 <div class="card-header-title">
                     <img src="amistoso.png" class="mode-icon" alt="Amistoso">
                     <span id="txt-turf-title">Combate amistoso</span>
                 </div>
 
-                <div class="schedule-section">
-                    <div class="schedule-section-header">
+                <div class="current-section">
+                    <div class="current-header">
                         <span id="friendly-current-rule">Territorial</span>
-                        <span class="time-label" id="friendly-current-time">Actual</span>
+                        <span style="font-size: 0.9rem;" id="friendly-current-time">12:00 a.m. – 2:00 a.m.</span>
                     </div>
-                    <div class="maps-grid">
+                    <div class="current-maps-grid">
                         <div class="map-box">
                             <img id="f-curr-map1" src="" class="map-img" alt="Mapa 1">
                             <p id="f-curr-name1" class="map-name">-</p>
@@ -592,12 +563,14 @@ body {
                     </div>
                 </div>
 
-                <div class="schedule-section">
-                    <div class="schedule-section-header">
-                        <span id="txt-next">Próximo</span>
-                        <span class="time-label"><span id="friendly-next-rule">Territorial</span> <span style="color:#00ffcc; font-size:0.75rem;" id="friendly-timer">Cargando...</span></span>
+                <div class="next-section">
+                    <div class="proximo-tag" id="txt-next">Próximo</div>
+                    <div class="next-content-layout">
+                        <div class="next-rule-title" id="friendly-next-rule">Territorial</div>
+                        <div class="next-timer-hours"><span id="friendly-timer">en 1h 09m 57s</span></div>
+                        <div class="next-time-range" id="friendly-next-time-range">2:00 a.m. - 4:00 a.m.</div>
                     </div>
-                    <div class="maps-grid" style="margin-bottom: 10px;">
+                    <div class="current-maps-grid">
                         <div class="map-box">
                             <img id="f-next-map1" src="" class="map-img" alt="Próx Mapa 1">
                             <p id="f-next-name1" class="map-name">-</p>
@@ -607,23 +580,28 @@ body {
                             <p id="f-next-name2" class="map-name">-</p>
                         </div>
                     </div>
-                    <button class="btn-upcoming" onclick="openUpcomingModal('friendly')" id="txt-btn-upcoming-1">⚙️ All Upcoming Stages</button>
+                    
+                    <button class="btn-upcoming" onclick="openUpcomingModal('friendly')" id="txt-btn-upcoming-1">
+                        <img src="squid-icon.png" style="width: 14px; height: 14px; filter: brightness(0) invert(1);" alt=""> 
+                        All Upcoming Stages
+                    </button>
                 </div>
             </div>
 
             <!-- 2. COMBATE COMPETITIVO -->
             <div class="splat-card card-orange">
+                <div class="hanger-hole"></div>
                 <div class="card-header-title">
                     <img src="competitivo.png" class="mode-icon" alt="Competitivo">
                     <span id="txt-ranked-title">Combate competitivo</span>
                 </div>
 
-                <div class="schedule-section">
-                    <div class="schedule-section-header">
-                        <span id="ranked-current-rule">Pintazonas</span>
-                        <span class="time-label" id="ranked-current-time">Actual</span>
+                <div class="current-section">
+                    <div class="current-header">
+                        <span id="ranked-current-rule">Torreón</span>
+                        <span style="font-size: 0.9rem;" id="ranked-current-time">12:00 a.m. – 2:00 a.m.</span>
                     </div>
-                    <div class="maps-grid">
+                    <div class="current-maps-grid">
                         <div class="map-box">
                             <img id="r-curr-map1" src="" class="map-img" alt="Mapa 1">
                             <p id="r-curr-name1" class="map-name">-</p>
@@ -635,12 +613,14 @@ body {
                     </div>
                 </div>
 
-                <div class="schedule-section">
-                    <div class="schedule-section-header">
-                        <span id="txt-next2">Próximo</span>
-                        <span class="time-label"><span id="ranked-next-rule">Torreón</span> <span style="color:#ffff00; font-size:0.75rem;" id="ranked-timer">Cargando...</span></span>
+                <div class="next-section">
+                    <div class="proximo-tag" id="txt-next2">Próximo</div>
+                    <div class="next-content-layout">
+                        <div class="next-rule-title" id="ranked-next-rule">Pez dorado</div>
+                        <div class="next-timer-hours"><span id="ranked-timer">en 57m 22s</span></div>
+                        <div class="next-time-range" id="ranked-next-time-range">2:00 a.m. - 4:00 a.m.</div>
                     </div>
-                    <div class="maps-grid" style="margin-bottom: 10px;">
+                    <div class="current-maps-grid">
                         <div class="map-box">
                             <img id="r-next-map1" src="" class="map-img" alt="Próx Mapa 1">
                             <p id="r-next-name1" class="map-name">-</p>
@@ -650,23 +630,28 @@ body {
                             <p id="r-next-name2" class="map-name">-</p>
                         </div>
                     </div>
-                    <button class="btn-upcoming" onclick="openUpcomingModal('ranked')" id="txt-btn-upcoming-2">⚙️ All Upcoming Stages</button>
+                    
+                    <button class="btn-upcoming" onclick="openUpcomingModal('ranked')" id="txt-btn-upcoming-2">
+                        <img src="squid-icon.png" style="width: 14px; height: 14px; filter: brightness(0) invert(1);" alt=""> 
+                        All Upcoming Stages
+                    </button>
                 </div>
             </div>
 
             <!-- 3. COMBATE DE LIGA -->
             <div class="splat-card card-pink">
+                <div class="hanger-hole"></div>
                 <div class="card-header-title">
                     <img src="toreno.png" class="mode-icon" alt="Liga">
                     <span id="txt-league-title">Combate de liga</span>
                 </div>
 
-                <div class="schedule-section">
-                    <div class="schedule-section-header">
-                        <span id="league-current-rule">Torreón</span>
-                        <span class="time-label" id="league-current-time">Actual</span>
+                <div class="current-section">
+                    <div class="current-header">
+                        <span id="league-current-rule">Pez dorado</span>
+                        <span style="font-size: 0.9rem;" id="league-current-time">12:00 a.m. – 2:00 a.m.</span>
                     </div>
-                    <div class="maps-grid">
+                    <div class="current-maps-grid">
                         <div class="map-box">
                             <img id="l-curr-map1" src="" class="map-img" alt="Mapa 1">
                             <p id="l-curr-name1" class="map-name">-</p>
@@ -678,12 +663,14 @@ body {
                     </div>
                 </div>
 
-                <div class="schedule-section">
-                    <div class="schedule-section-header">
-                        <span id="txt-next3">Próximo</span>
-                        <span class="time-label"><span id="league-next-rule">Pez dorado</span> <span style="color:#ffff00; font-size:0.75rem;" id="league-timer">Cargando...</span></span>
+                <div class="next-section">
+                    <div class="proximo-tag" id="txt-next3">Próximo</div>
+                    <div class="next-content-layout">
+                        <div class="next-rule-title" id="league-next-rule">Torreón</div>
+                        <div class="next-timer-hours"><span id="league-timer">en 1h 09m 57s</span></div>
+                        <div class="next-time-range" id="league-next-time-range">2:00 a.m. - 4:00 a.m.</div>
                     </div>
-                    <div class="maps-grid" style="margin-bottom: 10px;">
+                    <div class="current-maps-grid">
                         <div class="map-box">
                             <img id="l-next-map1" src="" class="map-img" alt="Próx Mapa 1">
                             <p id="l-next-name1" class="map-name">-</p>
@@ -693,89 +680,43 @@ body {
                             <p id="l-next-name2" class="map-name">-</p>
                         </div>
                     </div>
-                    <button class="btn-upcoming" onclick="openUpcomingModal('league')" id="txt-btn-upcoming-3">⚙️ All Upcoming Stages</button>
-                </div>
-            </div>
-
-            <!-- 4. SPLATFEST -->
-            <div class="splat-card card-purple">
-                <div class="card-header-title">
-                    <img src="splatfest.png" class="mode-icon" alt="Splatfest">
-                    <span id="txt-splatfest-title">Splatfest</span>
-                </div>
-
-                <!-- CARTEL DE INACTIVO -->
-                <div id="splatfest-closed-banner" class="closed-banner">
-                    <span>Cerrado / Próximamente</span>
-                </div>
-
-                <!-- CONTENIDO CUANDO EL SPLATFEST ESTÁ ACTIVO -->
-                <div id="splatfest-container" style="display: none;">
-                    <div class="schedule-section">
-                        <div class="schedule-section-header">
-                            <span id="splatfest-current-rule">Splatfest (Desafío)</span>
-                            <span class="time-label" id="splatfest-current-time">Actual</span>
-                        </div>
-                        <div class="maps-grid">
-                            <div class="map-box">
-                                <img id="sf-curr-map1" src="" class="map-img" alt="Mapa 1">
-                                <p id="sf-curr-name1" class="map-name">-</p>
-                            </div>
-                            <div class="map-box">
-                                <img id="sf-curr-map2" src="" class="map-img" alt="Mapa 2">
-                                <p id="sf-curr-name2" class="map-name">-</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="schedule-section">
-                        <div class="schedule-section-header">
-                            <span id="txt-next4">Próximo</span>
-                            <span class="time-label"><span id="splatfest-next-rule">Splatfest (General)</span> <span style="color:#00ffcc; font-size:0.75rem;" id="splatfest-timer">Cargando...</span></span>
-                        </div>
-                        <div class="maps-grid" style="margin-bottom: 10px;">
-                            <div class="map-box">
-                                <img id="sf-next-map1" src="" class="map-img" alt="Próx Mapa 1">
-                                <p id="sf-next-name1" class="map-name">-</p>
-                            </div>
-                            <div class="map-box">
-                                <img id="sf-next-map2" src="" class="map-img" alt="Próx Mapa 2">
-                                <p id="sf-next-name2" class="map-name">-</p>
-                            </div>
-                        </div>
-                        <button class="btn-upcoming" onclick="openUpcomingModal('splatfest')" id="txt-btn-upcoming-4">⚙️ All Upcoming Stages</button>
-                    </div>
+                    
+                    <button class="btn-upcoming" onclick="openUpcomingModal('league')" id="txt-btn-upcoming-3">
+                        <img src="squid-icon.png" style="width: 14px; height: 14px; filter: brightness(0) invert(1);" alt=""> 
+                        All Upcoming Stages
+                    </button>
                 </div>
             </div>
 
         </div>
 
-        <!-- SALMON RUN -->
+        <!-- SALMON RUN (DISEÑO LIMPIO HORIZONTAL) -->
         <div class="splat-card card-salmon">
-            <div class="card-header-container">
-                <div class="card-header-title">
+            <div class="hanger-hole"></div>
+
+            <div class="salmon-card-header">
+                <div class="card-header-title" style="margin: 0;">
                     <img src="salmon roon.png" class="mode-icon" alt="Salmon Run">
                     <span id="txt-salmon-title">Salmon Run</span>
                 </div>
                 <div id="salmon-status-badge" class="status-badge open">Abierto</div>
             </div>
             
-            <div class="schedule-section" id="salmon-current-section">
-                <div class="schedule-section-header">
-                    <span id="txt-salmon-current" style="font-weight: bold; font-size: 1.15rem;">Actual</span>
-                    <span class="time-label" id="salmon-time">4/8 6:00 p.m. – 6/8 6:00 a.m.</span>
+            <!-- SECCIÓN ACTUAL HORIZONTAL -->
+            <div class="next-section">
+                <div style="display: flex; gap: 12px; margin-bottom: 10px; align-items: baseline; flex-wrap: wrap;">
+                    <span class="proximo-tag" style="margin-bottom: 0;" id="txt-salmon-current">Actual</span>
+                    <span id="salmon-time" style="font-weight: bold; text-shadow: 1px 1px 1px #000; font-size: 0.95rem;">4/8 6:00 p.m. – 6/8 6:00 a.m.</span>
+                    <span id="salmon-restante" style="font-size: 0.85rem; color: #ffea00; margin-left: auto;">3h 55m 58s restante</span>
                 </div>
-                <div style="font-size: 0.85rem; color: #ffd1b3; margin-bottom: 8px;" id="salmon-restante">1d 8h 20m 19s restante</div>
 
-                <div class="salmon-current-content" id="salmon-active-content">
-                    <div class="salmon-current-left">
-                        <div class="salmon-current-map-container">
-                            <img id="salmon-map-img" src="" class="salmon-current-map-img" alt="Mapa Salmon Run">
-                            <p id="salmon-map-name" class="map-name" style="position: absolute; bottom: 0; width: 100%;">Bahía Deriva</p>
-                        </div>
+                <div class="salmon-current-horizontal">
+                    <div class="salmon-current-map-container">
+                        <img id="salmon-map-img" src="" class="salmon-current-map-img" alt="Mapa Salmon Run">
+                        <p id="salmon-map-name" class="map-name">Bahía Deriva</p>
                     </div>
-                    <div class="salmon-current-right">
-                        <p class="salmon-weapons-title" id="txt-weapons-label">Armas disponibles</p>
+                    <div class="salmon-current-info">
+                        <p class="salmon-weapons-title" id="txt-weapons-label" style="margin: 0 0 4px 0; font-size: 0.95rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Armas disponibles</p>
                         <div class="salmon-weapons-row">
                             <div class="weapon-item"><img id="salmon-w1" src="" alt="W1"></div>
                             <div class="weapon-item"><img id="salmon-w2" src="" alt="W2"></div>
@@ -784,82 +725,97 @@ body {
                         </div>
                     </div>
                 </div>
-
-                <div id="salmon-closed-content" style="display: none;" class="salmon-closed-message">
-                    <span id="txt-not-available">No disponible. Abre el jue, 6/8 12:00 p.m.</span>
-                </div>
             </div>
 
-            <div class="schedule-section" style="margin-bottom: 0;">
-                <div class="schedule-section-header" style="margin-bottom: 10px;">
-                    <span id="txt-salmon-next" style="font-weight: bold; font-size: 1.15rem;">Siguiente</span>
+            <!-- SECCIÓN SIGUIENTE (LISTA HORIZONTAL DE HORARIOS LIMPIOS CON NOMBRES DE MAPA) -->
+            <div class="next-section" style="margin-bottom: 10px;">
+                <span class="proximo-tag" id="txt-salmon-next">Siguiente</span>
+
+                <!-- Rotación Futura 1 -->
+                <div class="salmon-next-row-clean">
+                    <span class="salmon-next-time-text">
+                        <span class="salmon-next-map-name" style="font-size: 0.95rem; color: #ffd1b3; font-weight: bold; margin-right: 8px;"></span>
+                        <span id="salmon-next-time-1"></span>
+                    </span>
+                    <span class="salmon-next-cd-text" id="salmon-next-cd-1"></span>
                 </div>
 
-                <div class="salmon-next-item">
-                    <div class="salmon-next-info">
-                        <img id="salmon-next-img-1" src="" class="salmon-next-thumb" alt="Mapa Siguiente">
-                        <div class="salmon-next-details">
-                            <span class="salmon-next-time" id="salmon-next-time-1">jue, 6/8 12:00 p.m. – 8/8 12:00 a.m.</span>
-                            <span class="salmon-next-countdown" id="salmon-next-cd-1">en 1d 14h 25m</span>
-                        </div>
-                    </div>
-                    <div class="salmon-next-weapons">
-                        <div class="salmon-mini-weapon"><img id="salmon-nw1-1" src="" alt="NW1"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw1-2" src="" alt="NW2"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw1-3" src="" alt="NW3"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw1-4" src="" alt="NW4"></div>
-                    </div>
+                <!-- Rotación Futura 2 -->
+                <div class="salmon-next-row-clean">
+                    <span class="salmon-next-time-text">
+                        <span class="salmon-next-map-name" style="font-size: 0.95rem; color: #ffd1b3; font-weight: bold; margin-right: 8px;"></span>
+                        <span id="salmon-next-time-2"></span>
+                    </span>
+                    <span class="salmon-next-cd-text" id="salmon-next-cd-2"></span>
                 </div>
 
-                <div class="salmon-next-item">
-                    <div class="salmon-next-info">
-                        <img id="salmon-next-img-2" src="" class="salmon-next-thumb" alt="Mapa Siguiente">
-                        <div class="salmon-next-details">
-                            <span class="salmon-next-time" id="salmon-next-time-2">sáb, 8/8 6:00 a.m. – 10/8 12:00 a.m.</span>
-                            <span class="salmon-next-countdown" id="salmon-next-cd-2">en 3d 8h 25m</span>
-                        </div>
-                    </div>
-                    <div class="salmon-next-weapons">
-                        <div class="salmon-mini-weapon"><img id="salmon-nw2-1" src="" alt="NW1"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw2-2" src="" alt="NW2"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw2-3" src="" alt="NW3"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw2-4" src="" alt="NW4"></div>
-                    </div>
-                </div>
-
-                <div class="salmon-next-item">
-                    <div class="salmon-next-info">
-                        <img id="salmon-next-img-3" src="" class="salmon-next-thumb" alt="Mapa Siguiente">
-                        <div class="salmon-next-details">
-                            <span class="salmon-next-time" id="salmon-next-time-3">lun, 10/8 6:00 a.m. – 11/8 6:00 p.m.</span>
-                            <span class="salmon-next-countdown" id="salmon-next-cd-3">en 5d 8h 25m</span>
-                        </div>
-                    </div>
-                    <div class="salmon-next-weapons">
-                        <div class="salmon-mini-weapon"><img id="salmon-nw3-1" src="" alt="NW1"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw3-2" src="" alt="NW2"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw3-3" src="" alt="NW3"></div>
-                        <div class="salmon-mini-weapon"><img id="salmon-nw3-4" src="" alt="NW4"></div>
-                    </div>
+                <!-- Rotación Futura 3 -->
+                <div class="salmon-next-row-clean" style="margin-bottom: 0;">
+                    <span class="salmon-next-time-text">
+                        <span class="salmon-next-map-name" style="font-size: 0.95rem; color: #ffd1b3; font-weight: bold; margin-right: 8px;"></span>
+                        <span id="salmon-next-time-3"></span>
+                    </span>
+                    <span class="salmon-next-cd-text" id="salmon-next-cd-3"></span>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- VENTANA MODAL PARA PRÓXIMAS ROTACIONES -->
+    <!-- MODAL -->
     <div class="modal" id="upcomingModal">
-        <div class="modal-content">
+        <div class="modal-content" id="modalScrollContainer">
             <h3 id="modal-upcoming-title">Próximas Rotaciones</h3>
-            <div id="modalListContainer" style="margin: 15px 0;"></div>
+            <div id="modalListContainer" style="margin: 20px 0;"></div>
             <button class="close-modal" onclick="closeUpcomingModal()" id="txt-modal-close">Cerrar</button>
         </div>
     </div>
 
-    <!-- CARGA DE SCRIPTS UNIFICADOS -->
+    <!-- SCRIPTS -->
     <script src="combates.js"></script>
     <script src="salmon_rotations.js"></script>
     <script src="salmon.js"></script>
-    <script src="rotamapas.js"></script>
+    
+    <script>
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('page-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 300);
+            }
+        });
+
+        const originalOpenModal = window.openUpcomingModal;
+        window.openUpcomingModal = function(mode) {
+            if (typeof originalOpenModal === 'function') {
+                originalOpenModal(mode);
+            }
+            const modalBox = document.getElementById('modalScrollContainer');
+            if (modalBox) {
+                modalBox.scrollTop = 0;
+            }
+        };
+
+        const observer = new MutationObserver((mutations) => {
+            const container = document.getElementById('modalListContainer');
+            if (container) {
+                const items = container.querySelectorAll('div:not(.modal-rotation-block)');
+                items.forEach(item => {
+                    if ((item.querySelector('img') || item.textContent.includes('a.m.') || item.textContent.includes('p.m.')) && !item.parentElement.classList.contains('modal-rotation-block')) {
+                        if(item.parentNode === container && !item.classList.contains('modal-rotation-block')) {
+                            item.classList.add('modal-rotation-block');
+                        }
+                    }
+                });
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('modalListContainer');
+            if (container) {
+                observer.observe(container, { childList: true, subtree: true });
+            }
+        });
+    </script>
 </body>
 </html>

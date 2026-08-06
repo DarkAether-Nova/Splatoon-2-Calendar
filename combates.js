@@ -1,15 +1,14 @@
 // =========================================================================
-// CONFIGURACIÓN DE ROTACIÓN GLOBAL Y DATOS ONLINE
+// CONFIGURACIÓN DE ROTACIÓN GLOBAL Y DATOS ONLINE (NEXTENDO API)
 // =========================================================================
 
 // Secuencia de modos competitivos y de liga por rotación
 const rankedModesSequence = ["splatZones", "towerControl", "rainmaker", "clamBlitz"];
 
 // Control de activación de Splatfest (true = activo / false = inactivo)
-// Modificado a 'false' por defecto ya que no hay datos de Splatfest en rotamapas.js
 let isSplatfestActive = false; 
 
-// Almacén global para las rotaciones
+// Almacén global para las rotaciones obtenidas de la API
 let onlineRotationsData = {
     turfWarRotations: [],
     rankedBattleRotations: [],
@@ -18,54 +17,61 @@ let onlineRotationsData = {
 };
 
 // =========================================================================
-// 1. CARGAR DATOS DESDE EL ARCHIVO LOCAL (rotamapas.js)
+// 1. CARGAR DATOS DESDE LA API DE NEXTENDO NETWORK
 // =========================================================================
 
 async function fetchOnlineRotations() {
     try {
-        // Verificamos si la variable rotamapasData del otro archivo se cargó correctamente
-        if (typeof rotamapasData !== 'undefined') {
-            const data = rotamapasData;
-            
-            // Mapeamos los datos de rotamapasData a la estructura que usa tu interfaz
-            if (data.regular) {
-                onlineRotationsData.turfWarRotations = data.regular.map(rot => ({
-                    map1: rot.stages[0],
-                    map2: rot.stages[1],
-                    rule: rot.rule
-                }));
-            }
-            if (data.ranked) {
-                onlineRotationsData.rankedBattleRotations = data.ranked.map(rot => ({
-                    map1: rot.stages[0],
-                    map2: rot.stages[1],
-                    rule: rot.rule
-                }));
-            }
-            if (data.league) {
-                onlineRotationsData.leagueBattleRotations = data.league.map(rot => ({
-                    map1: rot.stages[0],
-                    map2: rot.stages[1],
-                    rule: rot.rule
-                }));
-            }
-            
-            // Si en algún momento añades splatfest al JSON, se mapeará aquí.
-            if (data.splatfest) {
-                onlineRotationsData.splatfestRotations = data.splatfest.map(rot => ({
-                    map1: rot.stages[0],
-                    map2: rot.stages[1],
-                    rule: rot.rule
-                }));
-            }
-        } else {
-            console.warn("No se encontró rotamapasData. Asegúrate de incluir rotamapas.js antes de este script en tu HTML.");
+        const response = await fetch("https://nextendo.network/api/splatoon2/rotation");
+        
+        if (!response.ok) {
+            throw new Error(`Error en la red: ${response.statusText}`);
         }
 
-        // Una vez cargados, actualizamos la interfaz
+        const data = await response.json();
+        
+        // Mapeamos los datos devueltos por la API de Nextendo a la estructura de la interfaz
+        // Nota: Asegúrate de ajustar las propiedades según el formato JSON exacto que entrega la API.
+        if (data.regular) {
+            onlineRotationsData.turfWarRotations = data.regular.map(rot => ({
+                map1: { name: rot.stages[0].name, image: rot.stages[0].image },
+                map2: { name: rot.stages[1].name, image: rot.stages[1].image },
+                rule: rot.rule || "turf"
+            }));
+        }
+
+        if (data.ranked) {
+            onlineRotationsData.rankedBattleRotations = data.ranked.map(rot => ({
+                map1: { name: rot.stages[0].name, image: rot.stages[0].image },
+                map2: { name: rot.stages[1].name, image: rot.stages[1].image },
+                rule: rot.rule
+            }));
+        }
+
+        if (data.league) {
+            onlineRotationsData.leagueBattleRotations = data.league.map(rot => ({
+                map1: { name: rot.stages[0].name, image: rot.stages[0].image },
+                map2: { name: rot.stages[1].name, image: rot.stages[1].image },
+                rule: rot.rule
+            }));
+        }
+        
+        if (data.splatfest) {
+            isSplatfestActive = true;
+            onlineRotationsData.splatfestRotations = data.splatfest.map(rot => ({
+                map1: { name: rot.stages[0].name, image: rot.stages[0].image },
+                map2: { name: rot.stages[1].name, image: rot.stages[1].image },
+                rule: rot.rule
+            }));
+        } else {
+            isSplatfestActive = false;
+        }
+
+        // Una vez cargados y mapeados los datos, actualizamos la interfaz
         refreshAllRotations();
+
     } catch (error) {
-        console.error("Error procesando los datos de rotaciones locales:", error);
+        console.error("Error al obtener las rotaciones desde la API de Nextendo:", error);
     }
 }
 
@@ -87,12 +93,13 @@ function getCurrentSlotStartTime() {
 }
 
 function getRotationSlot() {
-    // Cada bloque de rotación dura exactamente 2 horas (7,200,000 milisegundos)
-    // Usamos la hora actual enepoch dividida entre la duración del bloque para sincronizar perfectamente con el tiempo real.
     const now = Date.now();
-    const slotDuration = 2 * 60 * 60 * 1000;
-    return Math.floor(now / slotDuration);
+    // Utiliza un punto de referencia fijo con hora local 00:00
+    const anchorDate = new Date(2026, 0, 1, 0, 0, 0, 0).getTime();
+    const elapsed = now - anchorDate;
+    return Math.floor(elapsed / (2 * 60 * 60 * 1000));
 }
+
 
 // =========================================================================
 // 3. ACTUALIZAR ROTACIÓN DE CADA MODO EN PANTALLA PRINCIPAL
@@ -182,7 +189,7 @@ function updateCountdown(targetTime, timerElementId) {
 
 
 // =========================================================================
-// 5. MODAL DE PRÓXIMAS ROTACIONES (HORARIOS 00:00, 02:00, ETC.)
+// 5. MODAL DE PRÓXIMAS ROTACIONES
 // =========================================================================
 
 function openUpcomingModal(mode) {
@@ -212,7 +219,6 @@ function openUpcomingModal(mode) {
         const rotIndex = Math.abs(slot) % rotationsArray.length;
         const rotation = rotationsArray[rotIndex];
 
-        // Calcula el inicio de cada bloque a partir de las horas pares locales
         const slotStartTime = new Date(currentSlotStart.getTime() + (i * 2 * 60 * 60 * 1000));
         const slotEndTime = new Date(slotStartTime.getTime() + (2 * 60 * 60 * 1000));
 
@@ -267,7 +273,6 @@ function refreshAllRotations() {
     updateModeRotation(onlineRotationsData.rankedBattleRotations, "r", "ranked-timer");
     updateModeRotation(onlineRotationsData.leagueBattleRotations, "l", "league-timer");
 
-    // Control dinámico de activación/visibilidad para Splatfest
     const sfClosedBanner = document.getElementById("splatfest-closed-banner");
     const sfContainer = document.getElementById("splatfest-container");
 
@@ -280,7 +285,7 @@ function refreshAllRotations() {
         if (sfContainer) sfContainer.style.display = "none";
     }
 
-    // Actualización dinámica de Salmon Run si la función existe
+    // Actualización dinámica de Salmon Run
     if (typeof updateSalmonRunDynamic === "function") {
         updateSalmonRunDynamic();
     } else if (typeof salmonTargetTime !== "undefined") {
@@ -292,7 +297,6 @@ function refreshAllRotations() {
         }
     }
 
-    // Actualizar nombres dinámicos de las reglas de juego
     const selector = document.getElementById("languageSelect");
     const lang = selector ? selector.value : "es";
     const t = translations[lang] || translations.es;
@@ -449,7 +453,6 @@ function changeLanguage() {
     const lang = selector.value;
     const t = translations[lang] || translations.es;
 
-    // Títulos Principales
     const mainTitle = document.getElementById("main-title");
     if (mainTitle) mainTitle.innerText = t.title;
 
@@ -468,11 +471,9 @@ function changeLanguage() {
     const salmonTitle = document.getElementById("txt-salmon-title");
     if (salmonTitle) salmonTitle.innerText = t.salmonTitle;
 
-    // Cartel "Cerrado / Próximamente" en Splatfest
     const splatfestClosed = document.querySelector("#splatfest-closed-banner span");
     if (splatfestClosed) splatfestClosed.innerText = t.splatfestClosed;
 
-    // Botón / Badge de estado de Salmon Run
     const salmonBadge = document.getElementById("salmon-status-badge");
     if (salmonBadge) {
         const currentText = salmonBadge.innerText.trim().toLowerCase();
@@ -489,19 +490,16 @@ function changeLanguage() {
     const statusClosedEl = document.getElementById("txt-status-closed");
     if (statusClosedEl) statusClosedEl.innerText = t.statusClosed;
 
-    // Etiquetas "Actual"
     ["friendly-current-time", "ranked-current-time", "league-current-time", "splatfest-current-time", "salmon-current-time", "txt-salmon-current"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerText = t.current;
     });
 
-    // Etiquetas "Próximo"
     ["txt-next", "txt-next2", "txt-next3", "txt-next4", "txt-salmon-next"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerText = t.next;
     });
 
-    // Modos fijos (Amistoso y Splatfest)
     const friendlyCurrRule = document.getElementById("friendly-current-rule");
     if (friendlyCurrRule) friendlyCurrRule.innerText = t.modes.turf;
 
@@ -514,7 +512,6 @@ function changeLanguage() {
     const splatfestNextRule = document.getElementById("splatfest-next-rule");
     if (splatfestNextRule) splatfestNextRule.innerText = t.modes.splatfestTeam;
 
-    // Botones e interfaz modal
     ["txt-btn-upcoming-1", "txt-btn-upcoming-2", "txt-btn-upcoming-3", "txt-btn-upcoming-4"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerText = t.btnUpcoming;
@@ -529,7 +526,6 @@ function changeLanguage() {
     const weaponsLabel = document.getElementById("txt-weapons-label");
     if (weaponsLabel) weaponsLabel.innerText = t.weaponsLabel;
 
-    // Forzar actualización inmediata
     refreshAllRotations();
 }
 
@@ -541,7 +537,7 @@ function changeLanguage() {
 document.addEventListener("DOMContentLoaded", () => {
     changeLanguage();
     
-    // Llamamos a los datos locales al iniciar la página
+    // Consumir la API online en lugar de buscar la variable local
     fetchOnlineRotations();
     
     // Temporizador principal para refrescar los relojes en pantalla cada segundo
