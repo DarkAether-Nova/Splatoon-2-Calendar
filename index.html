@@ -45,6 +45,9 @@
             transition: opacity 0.3s ease;
         }
 
+.current-section, .next-section, .salmon-current-horizontal {
+    box-shadow: none; /* Elimina las sombras internas pesadas */
+}
         header {
             display: flex;
             justify-content: space-between;
@@ -56,6 +59,11 @@
             border-bottom: none;
         }
 
+
+body {
+    /* ... tus otros estilos ... */
+    background-attachment: scroll; /* Cambia 'fixed' por 'scroll' para liberar al navegador */
+}
         .header-left h1 {
             font-family: 'Splatfont2', sans-serif;
             font-size: 2.2rem;
