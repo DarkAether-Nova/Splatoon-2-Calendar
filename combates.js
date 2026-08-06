@@ -1,5 +1,5 @@
 // =========================================================================
-// CONFIGURACIÓN DE ROTACIÓN GLOBAL Y DATOS ONLINE (NEXTENDO API)
+// CONFIGURACIÓN DE ROTACIÓN GLOBAL Y DATOS ONLINE (NEXTENDO API + PROXY CORS)
 // =========================================================================
 
 // Secuencia de modos competitivos y de liga por rotación
@@ -17,12 +17,16 @@ let onlineRotationsData = {
 };
 
 // =========================================================================
-// 1. CARGAR DATOS DESDE LA API DE NEXTENDO NETWORK
+// 1. CARGAR DATOS DESDE LA API DE NEXTENDO NETWORK USANDO PROXY CORS
 // =========================================================================
 
 async function fetchOnlineRotations() {
     try {
-        const response = await fetch("https://nextendo.network/api/splatoon2/rotation");
+        // Usamos un proxy público de CORS para evitar el bloqueo del navegador en GitHub Pages
+        const targetUrl = "https://nextendo.network/api/splatoon2/rotation";
+        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+
+        const response = await fetch(proxyUrl);
         
         if (!response.ok) {
             throw new Error(`Error en la red: ${response.statusText}`);
@@ -30,8 +34,6 @@ async function fetchOnlineRotations() {
 
         const data = await response.json();
         
-        // Mapeamos los datos devueltos por la API de Nextendo a la estructura de la interfaz
-        // Nota: Asegúrate de ajustar las propiedades según el formato JSON exacto que entrega la API.
         if (data.regular) {
             onlineRotationsData.turfWarRotations = data.regular.map(rot => ({
                 map1: { name: rot.stages[0].name, image: rot.stages[0].image },
@@ -67,11 +69,10 @@ async function fetchOnlineRotations() {
             isSplatfestActive = false;
         }
 
-        // Una vez cargados y mapeados los datos, actualizamos la interfaz
         refreshAllRotations();
 
     } catch (error) {
-        console.error("Error al obtener las rotaciones desde la API de Nextendo:", error);
+        console.error("Error al obtener las rotaciones desde la API:", error);
     }
 }
 
@@ -85,16 +86,13 @@ function getCurrentSlotStartTime() {
     const startTime = new Date(now);
     const hours = now.getHours();
     
-    // Ajusta a la hora par anterior (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22)
     const currentEvenHour = hours - (hours % 2);
-    
     startTime.setHours(currentEvenHour, 0, 0, 0);
     return startTime;
 }
 
 function getRotationSlot() {
     const now = Date.now();
-    // Utiliza un punto de referencia fijo con hora local 00:00
     const anchorDate = new Date(2026, 0, 1, 0, 0, 0, 0).getTime();
     const elapsed = now - anchorDate;
     return Math.floor(elapsed / (2 * 60 * 60 * 1000));
@@ -109,38 +107,32 @@ function updateModeRotation(rotationsArray, prefix, timerId) {
     if (!rotationsArray || rotationsArray.length === 0) return;
 
     const slot = getRotationSlot();
-
     const currentIndex = Math.abs(slot) % rotationsArray.length;
     const nextIndex = (currentIndex + 1) % rotationsArray.length;
 
     const activeRotation = rotationsArray[currentIndex];
     const nextRotation = rotationsArray[nextIndex];
 
-    // MAPA ACTUAL 1
     const currMap1Img = document.getElementById(`${prefix}-curr-map1`);
     const currMap1Name = document.getElementById(`${prefix}-curr-name1`);
     if (currMap1Img) currMap1Img.src = activeRotation.map1.image;
     if (currMap1Name) currMap1Name.innerText = activeRotation.map1.name;
 
-    // MAPA ACTUAL 2
     const currMap2Img = document.getElementById(`${prefix}-curr-map2`);
     const currMap2Name = document.getElementById(`${prefix}-curr-name2`);
     if (currMap2Img) currMap2Img.src = activeRotation.map2.image;
     if (currMap2Name) currMap2Name.innerText = activeRotation.map2.name;
 
-    // PRÓXIMO MAPA 1
     const nextMap1Img = document.getElementById(`${prefix}-next-map1`);
     const nextMap1Name = document.getElementById(`${prefix}-next-name1`);
     if (nextMap1Img) nextMap1Img.src = nextRotation.map1.image;
     if (nextMap1Name) nextMap1Name.innerText = nextRotation.map1.name;
 
-    // PRÓXIMO MAPA 2
     const nextMap2Img = document.getElementById(`${prefix}-next-map2`);
     const nextMap2Name = document.getElementById(`${prefix}-next-name2`);
     if (nextMap2Img) nextMap2Img.src = nextRotation.map2.image;
     if (nextMap2Name) nextMap2Name.innerText = nextRotation.map2.name;
 
-    // Temporizador: la siguiente rotación es dentro del bloque actual + 2 horas
     const currentSlotStart = getCurrentSlotStartTime().getTime();
     const nextRotationTime = currentSlotStart + (2 * 60 * 60 * 1000);
     updateCountdown(nextRotationTime, timerId);
@@ -156,7 +148,6 @@ function updateCountdown(targetTime, timerElementId) {
     if (!timer) return;
 
     const diff = targetTime - Date.now();
-
     if (diff <= 0) {
         timer.innerText = "...";
         return;
@@ -168,13 +159,10 @@ function updateCountdown(targetTime, timerElementId) {
     const u = t.units || { d: "d", h: "h", m: "m", s: "s" };
 
     let totalSeconds = Math.floor(diff / 1000);
-    
     const days = Math.floor(totalSeconds / 86400);
     totalSeconds %= 86400;
-
     const hours = Math.floor(totalSeconds / 3600);
     totalSeconds %= 3600;
-
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
 
@@ -285,16 +273,8 @@ function refreshAllRotations() {
         if (sfContainer) sfContainer.style.display = "none";
     }
 
-    // Actualización dinámica de Salmon Run
     if (typeof updateSalmonRunDynamic === "function") {
         updateSalmonRunDynamic();
-    } else if (typeof salmonTargetTime !== "undefined") {
-        updateCountdown(salmonTargetTime, "salmon-timer");
-    } else {
-        const salmonTimerEl = document.getElementById("salmon-timer");
-        if (salmonTimerEl && salmonTimerEl.dataset.targetTime) {
-            updateCountdown(parseInt(salmonTimerEl.dataset.targetTime), "salmon-timer");
-        }
     }
 
     const selector = document.getElementById("languageSelect");
@@ -302,7 +282,6 @@ function refreshAllRotations() {
     const t = translations[lang] || translations.es;
 
     const slot = getRotationSlot();
-
     const rankedCurrKey = rankedModesSequence[slot % rankedModesSequence.length];
     const rankedNextKey = rankedModesSequence[(slot + 1) % rankedModesSequence.length];
 
@@ -484,12 +463,6 @@ function changeLanguage() {
         }
     }
 
-    const statusOpenEl = document.getElementById("txt-status-open");
-    if (statusOpenEl) statusOpenEl.innerText = t.statusOpen;
-
-    const statusClosedEl = document.getElementById("txt-status-closed");
-    if (statusClosedEl) statusClosedEl.innerText = t.statusClosed;
-
     ["friendly-current-time", "ranked-current-time", "league-current-time", "splatfest-current-time", "salmon-current-time", "txt-salmon-current"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerText = t.current;
@@ -505,12 +478,6 @@ function changeLanguage() {
 
     const friendlyNextRule = document.getElementById("friendly-next-rule");
     if (friendlyNextRule) friendlyNextRule.innerText = t.modes.turf;
-
-    const splatfestCurrRule = document.getElementById("splatfest-current-rule");
-    if (splatfestCurrRule) splatfestCurrRule.innerText = t.modes.splatfestSolo;
-
-    const splatfestNextRule = document.getElementById("splatfest-next-rule");
-    if (splatfestNextRule) splatfestNextRule.innerText = t.modes.splatfestTeam;
 
     ["txt-btn-upcoming-1", "txt-btn-upcoming-2", "txt-btn-upcoming-3", "txt-btn-upcoming-4"].forEach(id => {
         const el = document.getElementById(id);
@@ -536,14 +503,9 @@ function changeLanguage() {
 
 document.addEventListener("DOMContentLoaded", () => {
     changeLanguage();
-    
-    // Consumir la API online en lugar de buscar la variable local
     fetchOnlineRotations();
-    
-    // Temporizador principal para refrescar los relojes en pantalla cada segundo
     setInterval(refreshAllRotations, 1000);
 
-    // Cerrar modal al hacer clic fuera
     window.addEventListener("click", (event) => {
         const modal = document.getElementById("upcomingModal");
         if (event.target === modal) {
