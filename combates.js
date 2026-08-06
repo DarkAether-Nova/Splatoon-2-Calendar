@@ -1,5 +1,5 @@
 // =========================================================================
-// CONFIGURACIÓN DE ROTACIÓN GLOBAL Y DATOS ONLINE (NEXTENDO API + PROXY CORS)
+// CONFIGURACIÓN DE ROTACIÓN GLOBAL Y DATOS ONLINE (NEXTENDO API + CORSPROXY)
 // =========================================================================
 
 // Secuencia de modos competitivos y de liga por rotación
@@ -17,18 +17,19 @@ let onlineRotationsData = {
 };
 
 // =========================================================================
-// 1. CARGAR DATOS DESDE LA API DE NEXTENDO NETWORK USANDO PROXY CORS
+// 1. CARGAR DATOS DESDE LA API DE NEXTENDO NETWORK USANDO CORSPROXY.IO
 // =========================================================================
 
 async function fetchOnlineRotations() {
     try {
         const targetUrl = "https://nextendo.network/api/splatoon2/rotation";
-        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+        // Usamos corsproxy.io por ser más rápido y confiable en navegadores móviles
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
         const response = await fetch(proxyUrl);
         
         if (!response.ok) {
-            throw new Error(`Error en la red: ${response.statusText}`);
+            throw new Error(`Error en la red: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
@@ -302,7 +303,7 @@ function refreshAllRotations() {
 
 
 // =========================================================================
-// 7. SISTEMA DE TRADUCCIÓN E IDIOMA
+// 7. SISTEMA DE TRADUCCIÓN E IDIOMA (ES, EN, FR, PT)
 // =========================================================================
 
 const translations = {
