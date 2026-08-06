@@ -22,7 +22,6 @@ let onlineRotationsData = {
 
 async function fetchOnlineRotations() {
     try {
-        // Usamos un proxy público de CORS para evitar el bloqueo del navegador en GitHub Pages
         const targetUrl = "https://nextendo.network/api/splatoon2/rotation";
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
@@ -365,33 +364,33 @@ const translations = {
             splatfestTeam: "Splatfest (Normal)"
         }
     },
-    it: {
+    fr: {
         title: "NEXTENDO NETWORK / SPLATOON 2",
-        turfTitle: "Mischia mollusca",
-        rankedTitle: "Partita pro",
-        leagueTitle: "Partita a squadre",
-        splatfestTitle: "Festival",
+        turfTitle: "Match classique",
+        rankedTitle: "Match pro",
+        leagueTitle: "Match en ligue",
+        splatfestTitle: "Splatfest",
         salmonTitle: "Salmon Run",
-        current: "Attuale",
-        next: "Prossimo",
-        inPrefix: "tra",
-        remainingLabel: "Rimanente: ",
-        units: { d: "g", h: "o", m: "m", s: "s" },
-        statusOpen: "Aperto",
-        statusClosed: "Chiuso",
-        btnUpcoming: "⚙️ Prossimi scenari",
-        weaponsLabel: "Armi fornite",
-        modalTitle: "Prossime rotazioni",
-        modalClose: "Chiudi",
-        splatfestClosed: "Chiuso / In arrivo",
+        current: "Actuel",
+        next: "Prochain",
+        inPrefix: "dans",
+        remainingLabel: "Restant : ",
+        units: { d: "j", h: "h", m: "m", s: "s" },
+        statusOpen: "Ouvert",
+        statusClosed: "Fermé",
+        btnUpcoming: "⚙️ Prochains terrains",
+        weaponsLabel: "Armes fournies",
+        modalTitle: "Prochaines rotations",
+        modalClose: "Fermer",
+        splatfestClosed: "Fermé / Bientôt disponible",
         modes: {
-            turf: "Mischia mollusca",
-            splatZones: "Zona splat",
-            towerControl: "Torre mobile",
-            rainmaker: "Splattonara",
-            clamBlitz: "Splattonnara",
-            splatfestSolo: "Festival (Sfida)",
-            splatfestTeam: "Festival (Normale)"
+            turf: "Guerre de territoire",
+            splatZones: "Zone de contrôle",
+            towerControl: "Expédition risquée",
+            rainmaker: "Match Gaffe-goliath",
+            clamBlitz: "Pluie de palourdes",
+            splatfestSolo: "Splatfest (Défi)",
+            splatfestTeam: "Splatfest (Ouvert)"
         }
     },
     pt: {
@@ -456,7 +455,7 @@ function changeLanguage() {
     const salmonBadge = document.getElementById("salmon-status-badge");
     if (salmonBadge) {
         const currentText = salmonBadge.innerText.trim().toLowerCase();
-        if (["abierto", "open", "aperto", "aberto"].includes(currentText)) {
+        if (["abierto", "open", "ouvert", "aberto"].includes(currentText)) {
             salmonBadge.innerText = t.statusOpen;
         } else {
             salmonBadge.innerText = t.statusClosed;
