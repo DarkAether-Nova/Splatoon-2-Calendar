@@ -8,7 +8,12 @@
     <style>
         @font-face {
             font-family: 'Splatfont2';
-            src: url('BlitzBold.otf') format('truetype');
+            src: url('BlitzBold.otf') format('opentype');
+        }
+        /* Version RÉGULIÈRE de la police Splatoon 2 (le rendu de splatoon2.ink) : texte courant. */
+        @font-face {
+            font-family: 'SplatfontMain';
+            src: url('Splatfont2.ttf') format('truetype');
         }
 
         :root {
@@ -24,7 +29,7 @@
             background-repeat: repeat;
             background-size: 1080px;
             background-attachment: fixed;
-            font-family: 'Splatfont2', Arial, sans-serif;
+            font-family: 'SplatfontMain', 'Splatfont2', Arial, sans-serif;
             color: var(--text-white);
             overflow-x: hidden;
         }
@@ -102,18 +107,70 @@ body {
             background: rgba(0, 0, 0, 0.6);
         }
 
-        #languageSelect {
-            font-size: 1rem !important;
-            padding: 8px 16px !important;
+        /* Ancien <select> natif MASQUÉ : gardé comme source de vérité pour changeLanguage/getLang. */
+        #languageSelect { display: none !important; }
+
+        /* --- Sélecteur de langue CUSTOM (menu stylé, sans le surlignage bleu de l'OS) --- */
+        .lang-selector { position: relative; }
+        .lang-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.2);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+        }
+        .lang-btn:hover { background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.4); }
+        .lang-btn-globe { font-size: 1rem; line-height: 1; }
+        .lang-btn-label { min-width: 68px; text-align: left; }
+        .lang-btn-caret { font-size: 0.75rem; opacity: .8; transition: transform .2s; }
+        .lang-selector.open .lang-btn { border-color: #ff7a1f; background: rgba(0,0,0,0.6); }
+        .lang-selector.open .lang-btn-caret { transform: rotate(180deg); }
+        .lang-menu {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            min-width: 100%; margin: 0; padding: 6px;
+            list-style: none;
+            background: #191a2c;
+            border: 2px solid rgba(255,255,255,0.14);
+            border-radius: 14px;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.6);
+            opacity: 0; visibility: hidden; transform: translateY(-6px);
+            transition: opacity .15s ease, transform .15s ease, visibility .15s;
+            z-index: 1000;
+        }
+        .lang-selector.open .lang-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .lang-menu li {
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
+            color: #cfd3e6;
+            padding: 9px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .12s, color .12s;
+        }
+        .lang-menu li:hover { background: rgba(255,122,31,0.18); color: #fff; }
+        .lang-menu li[aria-selected="true"] {
+            background: linear-gradient(90deg, #ff7a1f, #ff5c9a);
+            color: #fff;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
         }
 
-        #languageSelect option {
-            background: #333;
-            color: #fff;
+        /* En-têtes en GRAS (BlitzBold) : titres de mode, Salmon Run, badges Prochain/Actuel.
+           Tout le reste hérite de SplatfontMain (régulier), comme splatoon2.ink. */
+        .card-header-title,
+        #txt-salmon-title,
+        .proximo-tag,
+        .status-badge {
+            font-family: 'Splatfont2', Arial, sans-serif;
         }
 
         .main-container {
-            max-width: 1700px;
+            max-width: 1920px;
             margin: 20px auto 40px auto;
             padding: 0 20px;
             display: flex;
@@ -129,9 +186,10 @@ body {
         }
 
         .splat-card {
-            width: 520px;
+            flex: 1 1 460px;
+            max-width: 760px;
             border-radius: 22px;
-            padding: 20px 24px;
+            padding: 14px 16px;
             position: relative;
             box-shadow: 0 12px 30px rgba(0,0,0,0.6);
             box-sizing: border-box;
@@ -140,24 +198,25 @@ body {
         }
 
         .card-green { 
-            background: repeating-linear-gradient( 45deg, #1ddb1d, #1ddb1d 22px, #16c816 22px, #16c816 44px );
+            background: repeating-linear-gradient( 45deg, #0fe10f, #0fe10f 22px, #0ccd0c 22px, #0ccd0c 44px );
             transform: rotate(-1.2deg);
         }
         .card-orange { 
-            background: repeating-linear-gradient( 45deg, #ff7100, #ff7100 22px, #e86600 22px, #e86600 44px );
+            background: repeating-linear-gradient( 45deg, #ff6e00, #ff6e00 22px, #f26400 22px, #f26400 44px );
             transform: rotate(0.8deg);
             margin-top: 10px;
         }
-        .card-pink { 
-            background: repeating-linear-gradient( 45deg, #f21379, #f21379 22px, #d80f6a 22px, #d80f6a 44px );
+        .card-pink {
+            background: repeating-linear-gradient( 45deg, #ff087c, #ff087c 22px, #e4066c 22px, #e4066c 44px );
             transform: rotate(-0.6deg);
         }
         
         .card-salmon { 
             background: repeating-linear-gradient( 45deg, #ff7a1f, #ff7a1f 22px, #e06612 22px, #e06612 44px );
-            width: 780px; 
+            width: 560px;
+            flex: 0 0 auto; /* colonne flex : ne PAS imposer de hauteur (sinon overflow:hidden rogne "Prochain"). */
             max-width: 100%;
-            margin: 0 auto; 
+            margin: 0 auto;
             transform: rotate(0.3deg);
             padding: 20px 25px;
         }
@@ -191,8 +250,8 @@ body {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 1.85rem;
-            margin: 12px 0 16px 0;
+            font-size: 2.35rem;
+            margin: 16px 0 10px 0;
             text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
             letter-spacing: 0.5px;
             padding: 0 4px;
@@ -210,7 +269,7 @@ body {
             background: rgba(0, 0, 0, 0.65);
             border-radius: 16px;
             padding: 14px;
-            margin-bottom: 18px;
+            margin-bottom: 12px;
             box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
         }
 
@@ -248,17 +307,19 @@ body {
             border-radius: 8px;
         }
 
+        /* Nom de map : style splatoon2.ink (.stage-title) — label bottom-right discret. */
         .map-name {
             position: absolute;
-            bottom: 2px;
+            bottom: 3px;
             right: 3px;
-            background: rgba(0, 0, 0, 0.85);
-            color: #fff;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: #dbdbdb;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 400;
             margin: 0;
-            text-shadow: none;
+            text-shadow: 1px 1px 0 #000;
             white-space: nowrap;
             max-width: 90%;
             overflow: hidden;
@@ -274,14 +335,14 @@ body {
         }
 
         .proximo-tag {
-            background-color: #6a11e8;
+            background: repeating-linear-gradient(45deg, #6a11e8, #6a11e8 10px, #5a0dc4 10px, #5a0dc4 20px);
             color: white;
             padding: 5px 15px;
             border-radius: 0 14px 14px 0;
             display: inline-block;
             font-size: 1.15rem;
             text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
-            margin-left: -28px; 
+            margin-left: -40px;
             position: relative;
             box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
             margin-bottom: 12px;
@@ -290,27 +351,91 @@ body {
         .next-content-layout {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 1px;
+            align-items: center;
+            text-align: center;
+            line-height: 1.15;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
             padding: 0 2px;
             margin-bottom: 12px;
         }
 
+        /* Bloc "Prochain" (VS) : centré comme splatoon2.ink, mais polices agrandies (place dispo). */
         .next-rule-title {
             font-size: 1.2rem;
             font-weight: bold;
         }
 
         .next-timer-hours {
-            font-size: 1rem;
+            font-size: 1.05rem;
             color: #ffea00;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
         }
 
         .next-time-range {
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             font-weight: bold;
         }
+
+        /* Texte + maps CÔTE À CÔTE dans la section "next" (au lieu d'empilés -> comble le vide). */
+        .next-section {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            column-gap: 14px;
+        }
+        .next-section .proximo-tag { flex: 0 0 auto; align-self: flex-start; }
+        /* Maps "Prochain" AGRANDIES : la grille prend plus de place (grow 2) sans dépasser la
+           ligne (bases <100%), et les maps restent en 16:9. */
+        .next-section .next-content-layout { flex: 1 1 28%; min-width: 118px; margin-bottom: 0; }
+        .next-section .current-maps-grid { flex: 3 1 66%; min-width: 320px; }
+        .next-section .btn-upcoming { flex: 0 0 auto; margin: 10px auto 0; }
+        /* Saut de ligne forcé : garde la banderole "Prochain" seule sur sa ligne (à gauche). */
+        .nx-break { flex: 0 0 100%; height: 0; }
+        /* Le Salmon Run réutilise .next-section : ne PAS lui appliquer la mise en page flex des
+           cartes VS (sinon sa liste "Suivant" se replie et disparaît). On garde un flux bloc. */
+        .card-salmon .next-section { display: block; }
+
+        /* Footer façon Nextendo (disclaimer + crédit + liens). */
+        .nx-footer {
+            max-width: 1920px;
+            margin: 6px auto 34px;
+            padding: 22px 24px 6px;
+            border-top: 2px solid rgba(255,255,255,0.12);
+            text-align: center;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.55;
+        }
+        .nx-footer-disc { max-width: 820px; margin: 0 auto 10px; font-size: 0.82rem; }
+        .nx-footer-credit { margin: 6px 0; font-size: 0.95rem; }
+        .nx-footer-credit strong { color: #fff; }
+        .nx-footer-links {
+            margin-top: 10px;
+            display: flex; gap: 12px;
+            justify-content: center; align-items: center;
+            flex-wrap: wrap; font-weight: bold; font-size: 1rem;
+        }
+        .nx-footer a { color: #ff7a1f; text-decoration: none; }
+        .nx-footer a:hover { text-decoration: underline; }
+        .nx-footer-links span { opacity: 0.4; }
+
+        /* Liste "Prochain" du Salmon Run, disposée comme splatoon2.ink. */
+        .salmon-next-list { display: flex; flex-direction: column; gap: 8px; }
+        .sr-next-row {
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 8px 12px;
+        }
+        .sr-next-head { display: flex; align-items: center; gap: 10px; }
+        .sr-next-icon { width: 24px; height: 24px; object-fit: cover; border-radius: 5px; flex: 0 0 auto; }
+        .sr-next-date { font-weight: bold; font-size: 1rem; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.9); }
+        .sr-next-cd { margin-left: auto; color: #ffea00; font-size: 0.92rem; font-weight: bold; white-space: nowrap; }
+        .sr-next-detail { display: flex; align-items: center; gap: 12px; margin-top: 8px; padding-left: 34px; }
+        .sr-next-map { width: 104px; height: 58px; object-fit: cover; border-radius: 6px; flex: 0 0 auto; box-shadow: 1px 1px 3px rgba(0,0,0,.7); cursor: zoom-in; }
+        .sr-next-mapname { font-weight: bold; color: #ffd1b3; font-size: 0.95rem; }
+        .sr-next-weps { display: flex; gap: 5px; margin-left: auto; }
+        .sr-next-wep { width: 36px; height: 36px; object-fit: contain; background: rgba(0,0,0,0.5); border-radius: 50%; padding: 3px; }
 
         .btn-upcoming {
             background: rgba(255, 255, 255, 0.25);
@@ -400,8 +525,10 @@ body {
 
         /* Iconos de armas con tamaño aumentado a 60px */
         .weapon-item {
-            width: 60px;
-            height: 60px;
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: 60px;
+            aspect-ratio: 1;
             background: rgba(0,0,0,0.5);
             border-radius: 50%;
             padding: 4px;
@@ -512,15 +639,79 @@ body {
 
         .close-modal:hover { background: rgba(255, 255, 255, 0.4); }
 
-        @media(max-width: 1650px) {
+        @media(max-width: 1500px) {
             .cards-grid { flex-direction: column; align-items: center; }
-            .splat-card { width: 100%; max-width: 580px; transform: none !important; }
+            .splat-card { width: 100%; max-width: 660px; transform: none !important; }
         }
+
+        /* --- Barre de scroll custom (modale) — couleur pilotée par le mode (--sb) --- */
+        #modalScrollContainer::-webkit-scrollbar,
+        #modalListContainer::-webkit-scrollbar { width: 14px; }
+        #modalScrollContainer::-webkit-scrollbar-track,
+        #modalListContainer::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.45); border-radius: 10px;
+        }
+        #modalScrollContainer::-webkit-scrollbar-thumb,
+        #modalListContainer::-webkit-scrollbar-thumb {
+            background: var(--sb, linear-gradient(180deg, #ff3d7f, #7b2ff7));
+            border-radius: 10px; border: 2px solid rgba(0,0,0,0.35);
+        }
+        #modalScrollContainer::-webkit-scrollbar-thumb:hover,
+        #modalListContainer::-webkit-scrollbar-thumb:hover { filter: brightness(1.18); }
+        #modalScrollContainer, #modalListContainer {
+            scrollbar-width: thin; scrollbar-color: var(--sb-ff, #ff3d7f) rgba(0,0,0,0.45);
+        }
+
+        /* --- Maps cliquables --- */
+        .map-img { cursor: zoom-in; transition: transform .15s ease, filter .15s ease; }
+        .map-img:hover { transform: scale(1.02); filter: brightness(1.08); }
+
+        /* --- Lightbox (image en grand, taille UNIFORME + inclinaison au clic) --- */
+        #imgLightbox {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88); z-index: 9999;
+            justify-content: center; align-items: center; flex-direction: column;
+            cursor: zoom-out; animation: lbFade .15s ease;
+        }
+        #imgLightbox.open { display: flex; }
+        #imgLightboxImg {
+            width: min(90vw, 1000px); height: auto; max-height: 80vh;
+            object-fit: contain; border-radius: 12px;
+            box-shadow: 0 14px 50px rgba(0,0,0,0.75);
+            border: 3px solid rgba(255,255,255,0.15);
+            transition: transform .2s ease;
+        }
+        #imgLightboxCap {
+            margin-top: 20px; font-family: 'Splatfont2', sans-serif;
+            color: #fff; font-size: 1.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.85);
+        }
+        @keyframes lbFade { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div id="page-loader">Cargando rotaciones...</div>
+    <script>
+        // Traduit le texte du loader AVANT le premier rendu (pas de flash espagnol).
+        (function () {
+            var L = {
+                es: "Cargando rotaciones...",
+                en: "Loading rotations...",
+                fr: "Chargement des rotations...",
+                pt: "Carregando rotações...",
+                it: "Caricamento rotazioni...",
+                de: "Rotationen werden geladen...",
+                ja: "ローテーションを読み込み中..."
+            };
+            var lang = localStorage.getItem("nextendo_lang");
+            if (!lang) {
+                var n = (navigator.language || "es").slice(0, 2).toLowerCase();
+                lang = L[n] ? n : "es";
+            }
+            var el = document.getElementById("page-loader");
+            if (el && L[lang]) el.textContent = L[lang];
+        })();
+    </script>
 
     <header>
         <div class="header-left">
@@ -528,16 +719,27 @@ body {
         </div>
         <div class="header-right">
             <div class="nav-buttons-container">
-                <a href="partidas_liga.html" class="nav-btn">Mas informacion</a>
-                <a href="partidas_splatfest.html" class="nav-btn">Splatfest</a>
+                <a href="partidas_liga.html" class="nav-btn" id="nav-moreinfo">Mas informacion</a>
+                <a href="partidas_splatfest.html" class="nav-btn" id="nav-splatfest">Splatfest</a>
             </div>
-            <div class="lang-selector">
-                <select id="languageSelect" onchange="changeLanguage()">
+            <div class="lang-selector" id="langSelector">
+                <select id="languageSelect" onchange="changeLanguage()" aria-hidden="true" tabindex="-1">
                     <option value="es">Español</option>
                     <option value="en">English</option>
-                    <option value="fr">Frances</option>
+                    <option value="fr">Français</option>
                     <option value="pt">Português</option>
                 </select>
+                <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="lang-btn-globe" aria-hidden="true">🌐</span>
+                    <span class="lang-btn-label" id="langBtnLabel">Français</span>
+                    <span class="lang-btn-caret" aria-hidden="true">▾</span>
+                </button>
+                <ul class="lang-menu" id="langMenu" role="listbox">
+                    <li role="option" data-lang="es">Español</li>
+                    <li role="option" data-lang="en">English</li>
+                    <li role="option" data-lang="fr">Français</li>
+                    <li role="option" data-lang="pt">Português</li>
+                </ul>
             </div>
         </div>
     </header>
@@ -573,7 +775,7 @@ body {
 
                 <div class="next-section">
                     <div class="proximo-tag" id="txt-next">Próximo</div>
-                    <div class="next-content-layout">
+                    <div class="nx-break"></div><div class="next-content-layout">
                         <div class="next-rule-title" id="friendly-next-rule">Territorial</div>
                         <div class="next-timer-hours"><span id="friendly-timer">en 1h 09m 57s</span></div>
                         <div class="next-time-range" id="friendly-next-time-range">2:00 a.m. - 4:00 a.m.</div>
@@ -623,7 +825,7 @@ body {
 
                 <div class="next-section">
                     <div class="proximo-tag" id="txt-next2">Próximo</div>
-                    <div class="next-content-layout">
+                    <div class="nx-break"></div><div class="next-content-layout">
                         <div class="next-rule-title" id="ranked-next-rule">Pez dorado</div>
                         <div class="next-timer-hours"><span id="ranked-timer">en 57m 22s</span></div>
                         <div class="next-time-range" id="ranked-next-time-range">2:00 a.m. - 4:00 a.m.</div>
@@ -673,7 +875,7 @@ body {
 
                 <div class="next-section">
                     <div class="proximo-tag" id="txt-next3">Próximo</div>
-                    <div class="next-content-layout">
+                    <div class="nx-break"></div><div class="next-content-layout">
                         <div class="next-rule-title" id="league-next-rule">Torreón</div>
                         <div class="next-timer-hours"><span id="league-timer">en 1h 09m 57s</span></div>
                         <div class="next-time-range" id="league-next-time-range">2:00 a.m. - 4:00 a.m.</div>
@@ -704,18 +906,17 @@ body {
 
             <div class="salmon-card-header">
                 <div class="card-header-title" style="margin: 0;">
-                    <img src="salmon roon.png" class="mode-icon" alt="Salmon Run">
+                    <img src="salmon-icon.png" class="mode-icon" alt="Salmon Run">
                     <span id="txt-salmon-title">Salmon Run</span>
                 </div>
-                <div id="salmon-status-badge" class="status-badge open">Abierto</div>
             </div>
             
             <!-- SECCIÓN ACTUAL HORIZONTAL -->
             <div class="next-section">
                 <div style="display: flex; gap: 12px; margin-bottom: 10px; align-items: baseline; flex-wrap: wrap;">
-                    <span class="proximo-tag" style="margin-bottom: 0;" id="txt-salmon-current">Actual</span>
-                    <span id="salmon-time" style="font-weight: bold; text-shadow: 1px 1px 1px #000; font-size: 0.95rem;">4/8 6:00 p.m. – 6/8 6:00 a.m.</span>
-                    <span id="salmon-restante" style="font-size: 0.85rem; color: #ffea00; margin-left: auto;">3h 55m 58s restante</span>
+                    <span class="proximo-tag" style="margin-bottom: 0;" id="txt-salmon-current">Ouvert!</span>
+                    <span id="salmon-time" style="font-weight: bold; text-shadow: 1px 1px 1px #000; font-size: 1.2rem;">4/8 6:00 p.m. – 6/8 6:00 a.m.</span>
+                    <span id="salmon-restante" style="font-size: 1.1rem; color: #ffea00; flex-basis: 100%; margin-top: 2px;">3h 55m 58s restante</span>
                 </div>
 
                 <div class="salmon-current-horizontal">
@@ -735,40 +936,36 @@ body {
                 </div>
             </div>
 
-            <!-- SECCIÓN SIGUIENTE (LISTA HORIZONTAL DE HORARIOS LIMPIOS CON NOMBRES DE MAPA) -->
+            <!-- SECTION "PROCHAIN" façon splatoon2.ink (générée par salmon_rotations.js). -->
             <div class="next-section" style="margin-bottom: 10px;">
                 <span class="proximo-tag" id="txt-salmon-next">Siguiente</span>
-
-                <!-- Rotación Futura 1 -->
-                <div class="salmon-next-row-clean">
-                    <span class="salmon-next-time-text">
-                        <span class="salmon-next-map-name" style="font-size: 0.95rem; color: #ffd1b3; font-weight: bold; margin-right: 8px;"></span>
-                        <span id="salmon-next-time-1"></span>
-                    </span>
-                    <span class="salmon-next-cd-text" id="salmon-next-cd-1"></span>
-                </div>
-
-                <!-- Rotación Futura 2 -->
-                <div class="salmon-next-row-clean">
-                    <span class="salmon-next-time-text">
-                        <span class="salmon-next-map-name" style="font-size: 0.95rem; color: #ffd1b3; font-weight: bold; margin-right: 8px;"></span>
-                        <span id="salmon-next-time-2"></span>
-                    </span>
-                    <span class="salmon-next-cd-text" id="salmon-next-cd-2"></span>
-                </div>
-
-                <!-- Rotación Futura 3 -->
-                <div class="salmon-next-row-clean" style="margin-bottom: 0;">
-                    <span class="salmon-next-time-text">
-                        <span class="salmon-next-map-name" style="font-size: 0.95rem; color: #ffd1b3; font-weight: bold; margin-right: 8px;"></span>
-                        <span id="salmon-next-time-3"></span>
-                    </span>
-                    <span class="salmon-next-cd-text" id="salmon-next-cd-3"></span>
-                </div>
+                <div id="salmon-next-list" class="salmon-next-list"></div>
             </div>
         </div>
 
     </div>
+
+    <!-- FOOTER façon Nextendo -->
+    <footer class="nx-footer">
+        <p class="nx-footer-disc">
+            Ce site n'est pas affilié à Nintendo. Tous les noms de produits, logos et marques
+            appartiennent à leurs propriétaires respectifs.
+        </p>
+        <p class="nx-footer-credit">
+            Calendrier original par
+            <a href="https://github.com/darkaether-nova" target="_blank" rel="noopener">darkaether-nova</a>
+            &nbsp;·&nbsp; hébergé par <strong>Nextendo&nbsp;Network</strong>
+            &nbsp;·&nbsp; design repris de
+            <a href="https://splatoon2.ink" target="_blank" rel="noopener">splatoon2.ink</a>
+        </p>
+        <nav class="nx-footer-links">
+            <a href="https://nextendo.network" target="_blank" rel="noopener">Nextendo Network</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://discord.gg/XPfeCMwnzQ" target="_blank" rel="noopener">Discord</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://github.com/NextendoNetwork" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+    </footer>
 
     <!-- MODAL -->
     <div class="modal" id="upcomingModal">
@@ -782,7 +979,8 @@ body {
     <!-- SCRIPTS -->
     <script src="combates.js"></script>
     <script src="salmon_rotations.js"></script>
-    <script src="salmon.js"></script>
+    <!-- salmon.js retiré : doublon de salmon_rotations.js (re-déclaration de salmonRotations -> SyntaxError). À consolider en un seul fichier. -->
+
     
     <script>
         window.addEventListener('load', () => {
@@ -825,5 +1023,38 @@ body {
             }
         });
     </script>
+
+    <script>
+        // Menu de langue custom : ouverture/fermeture + sélection. Le <select> caché reste la
+        // source de vérité (changeLanguage/getLang lisent sa .value ; changeLanguage sync le bouton).
+        (function () {
+            var wrap = document.getElementById('langSelector');
+            var sel = document.getElementById('languageSelect');
+            var btn = document.getElementById('langBtn');
+            var menu = document.getElementById('langMenu');
+            if (!wrap || !sel || !btn || !menu) return;
+            function close() { wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var open = wrap.classList.toggle('open');
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+            menu.addEventListener('click', function (e) {
+                var li = e.target.closest('li[data-lang]');
+                if (!li) return;
+                sel.value = li.dataset.lang;
+                if (typeof changeLanguage === 'function') changeLanguage();
+                close();
+            });
+            document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) close(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+        })();
+    </script>
+
+    <!-- LIGHTBOX : image en grand au clic sur une map -->
+    <div id="imgLightbox" onclick="closeImgLightbox()">
+        <img id="imgLightboxImg" src="" alt="">
+        <div id="imgLightboxCap"></div>
+    </div>
 </body>
 </html>
