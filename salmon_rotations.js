@@ -93,8 +93,36 @@ const salmonRotations = [
 
 function formatCustomDate(dateStr, lang = 'es') {
     const date = new Date(dateStr);
-    const options = { weekday: 'short', month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+    const options = { weekday: 'short', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
     return date.toLocaleDateString(lang === 'es' ? 'es-ES' : lang, options);
+}
+
+// Nom du stage Salmon Run dans la langue demandée. Les données n'ont pas de clé
+// "fr" (d'où le retour en espagnol) : on retombe alors sur les noms officiels
+// Nextendo (SALMON_NAMES, défini dans combates.js), reliés par le nom anglais.
+function salmonStageName(stage, lang) {
+    if (typeof stage !== 'object' || stage === null) return stage || '';
+    if (stage[lang]) return stage[lang];
+    if (typeof SALMON_NAMES !== 'undefined' && stage.en) {
+        for (const k in SALMON_NAMES) {
+            if (SALMON_NAMES[k].en === stage.en) return SALMON_NAMES[k][lang] || SALMON_NAMES[k].en;
+        }
+    }
+    return stage.en || stage.es || '';
+}
+
+// "dans Xj Xh Xm" — compte à rebours jusqu'au début d'un créneau (façon splatoon2.ink).
+function salmonCountdownStr(targetMs, t, u) {
+    const pre = (t && t.inPrefix) ? t.inPrefix : 'en';
+    const diff = targetMs - Date.now();
+    if (diff <= 0) return pre + ' …';
+    let s = Math.floor(diff / 1000);
+    const d = Math.floor(s / 86400); s %= 86400;
+    const h = Math.floor(s / 3600); s %= 3600;
+    const m = Math.floor(s / 60); const sec = s % 60;
+    if (d > 0) return `${pre} ${d}${u.d} ${h}${u.h} ${m}${u.m}`;
+    if (h > 0) return `${pre} ${h}${u.h} ${m}${u.m}`;
+    return `${pre} ${m}${u.m} ${sec}${u.s}`;
 }
 
 function updateSalmonRunDynamic() {
@@ -118,6 +146,14 @@ function updateSalmonRunDynamic() {
         }
     }
 
+    // Filet de sécurité : le jeu de données Salmon est FIXE et court (il "expire" le 13/08).
+    // Pour que "Prochain" ne soit JAMAIS vide (date proche/au-delà de la fin des données),
+    // on complète en bouclant sur le début du jeu de données.
+    if (nextEvents.length < 3 && salmonRotations.length) {
+        let k = 0;
+        while (nextEvents.length < 3) { nextEvents.push(salmonRotations[k % salmonRotations.length]); k++; }
+    }
+
     const lang = document.getElementById('languageSelect') ? document.getElementById('languageSelect').value : 'es';
     const t = (typeof translations !== 'undefined' && translations[lang]) ? translations[lang] : { inPrefix: 'en', remainingLabel: 'Restante: ' };
     const u = t.units || { d: 'd', h: 'h', m: 'm', s: 's' };
@@ -127,7 +163,7 @@ function updateSalmonRunDynamic() {
         if (mapImg) mapImg.src = currentEvent.image;
         
         const mapName = document.getElementById('salmon-map-name');
-        if (mapName) mapName.innerText = (typeof currentEvent.stage === 'object') ? (currentEvent.stage[lang] || currentEvent.stage.es) : currentEvent.stage;
+        if (mapName) mapName.innerText = salmonStageName(currentEvent.stage, lang);
         
         const timeEl = document.getElementById('salmon-time');
         if (timeEl) timeEl.innerText = `${formatCustomDate(currentEvent.start, lang)} – ${formatCustomDate(currentEvent.end, lang)}`;
@@ -148,6 +184,40 @@ function updateSalmonRunDynamic() {
         if (typeof setSalmonRunStatus === 'function') setSalmonRunStatus(false, openingTimeStr);
     }
 
+    // ── Liste "Prochain" façon splatoon2.ink : chaque créneau = plage de dates (gauche) +
+    //    compte à rebours (droite) ; la 1ʳᵉ ligne est détaillée (vignette map + nom + armes). ──
+    const nextList = document.getElementById('salmon-next-list');
+    if (nextList) {
+        const toShow = nextEvents.slice(0, 4);
+        const sig = toShow.map(e => e.start).join('|') + '|' + lang;
+        if (nextList.dataset.sig !== sig) {   // ne reconstruit que si le set/langue change (pas de flicker)
+            nextList.dataset.sig = sig;
+            nextList.innerHTML = toShow.map((ev, idx) => {
+                const dateRange = `${formatCustomDate(ev.start, lang)} – ${formatCustomDate(ev.end, lang)}`;
+                let detail = '';
+                if (idx === 0) {
+                    let weps = '';
+                    for (let w = 0; w < 4 && ev.weapons && ev.weapons[w]; w++) {
+                        weps += `<img src="${ev.weapons[w].image}" class="sr-next-wep" alt="">`;
+                    }
+                    detail = '<div class="sr-next-detail">'
+                        + `<img src="${ev.image}" class="sr-next-map map-img" alt="${salmonStageName(ev.stage, lang)}">`
+                        + `<span class="sr-next-mapname">${salmonStageName(ev.stage, lang)}</span>`
+                        + `<span class="sr-next-weps">${weps}</span></div>`;
+                }
+                return `<div class="sr-next-row${idx === 0 ? ' sr-next-row--featured' : ''}">`
+                    + '<div class="sr-next-head">'
+                    + '<img src="salmon-icon.png" class="sr-next-icon" alt="">'
+                    + `<span class="sr-next-date">${dateRange}</span>`
+                    + `<span class="sr-next-cd" data-start="${new Date(ev.start).getTime()}"></span>`
+                    + `</div>${detail}</div>`;
+            }).join('');
+        }
+        nextList.querySelectorAll('.sr-next-cd').forEach(el => {
+            el.innerText = salmonCountdownStr(parseInt(el.dataset.start, 10), t, u);
+        });
+    }
+
     for (let i = 0; i < 3; i++) {
         const itemIdx = currentEvent ? i : i + 1;
         const nextItem = nextEvents[itemIdx];
@@ -158,6 +228,19 @@ function updateSalmonRunDynamic() {
         let nameEl = cardContainer ? cardContainer.querySelector('.salmon-next-map-name') : null;
 
         if (nextItem && cardContainer) {
+            // Vignette de la map du créneau à venir (créée si absente du HTML), insérée en tête
+            // de ligne. Classe map-img -> ouvrable en grand au clic comme les autres.
+            let thumb = cardContainer.querySelector('.salmon-next-thumb');
+            if (!thumb) {
+                thumb = document.createElement('img');
+                thumb.className = 'salmon-next-thumb map-img';
+                thumb.style.cssText = 'width:74px;height:42px;object-fit:cover;border-radius:6px;flex:0 0 auto;box-shadow:1px 1px 3px rgba(0,0,0,.7);cursor:zoom-in;';
+                cardContainer.insertBefore(thumb, cardContainer.firstChild);
+            }
+            thumb.style.display = '';
+            thumb.src = nextItem.image;
+            thumb.alt = salmonStageName(nextItem.stage, lang);
+
             if (!nameEl) {
                 nameEl = document.createElement('span');
                 nameEl.className = 'salmon-next-map-name';
@@ -166,7 +249,7 @@ function updateSalmonRunDynamic() {
                 nameEl.style.fontWeight = 'bold';
                 cardContainer.insertBefore(nameEl, timeEl);
             }
-            nameEl.innerText = (typeof nextItem.stage === 'object') ? (nextItem.stage[lang] || nextItem.stage.es) : nextItem.stage;
+            nameEl.innerText = salmonStageName(nextItem.stage, lang);
             if (timeEl) timeEl.innerText = `${formatCustomDate(nextItem.start, lang)} – ${formatCustomDate(nextItem.end, lang)}`;
 
             if (imgEl) imgEl.src = nextItem.image;
@@ -181,8 +264,10 @@ function updateSalmonRunDynamic() {
                     }
                 }
             }
-        } else if (nameEl) {
-            nameEl.innerText = "";
+        } else {
+            if (nameEl) nameEl.innerText = "";
+            const thumb = cardContainer ? cardContainer.querySelector('.salmon-next-thumb') : null;
+            if (thumb) thumb.style.display = "none";
         }
     }
 
