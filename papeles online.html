@@ -257,6 +257,17 @@
             border-bottom: 2px dashed #ddd;
         }
 
+/* Hace que la imagen sea invisible si no tiene un src asignado o está vacío */
+.paper-map-img:not([src]), 
+.paper-map-img[src=""] {
+    opacity: 0;
+}
+
+/* Opcional: añade un pequeño efecto de desvanecimiento cuando la imagen por fin carga */
+.paper-map-img {
+    transition: opacity 0.3s ease-in;
+}
+
         .paper-title {
             font-family: 'Splatfont2', sans-serif;
             font-size: 1.3rem;
@@ -375,9 +386,13 @@
             transition: background 0.2s;
         }
 
-        .tear-strip.disconnected {
+.tear-strip.disconnected {
             background: transparent;
-            border-right: 1px dashed #ccc;
+            border-top: none;
+            border-bottom: none;
+            /* Mantiene solo la línea divisoria derecha para que no se descuadre */
+            border-left: none;
+            border-right: 1px dashed #ccc; 
         }
 
         .tear-strip:last-child {
@@ -671,9 +686,9 @@
             "Kuro", "Shiro", "Alpha", "Beta", "Gamma", "Delta", "Omega", "Sigma",
             "Splat99", "RollerPro", "ChargerX", "BlasterZ", "Dualies", "BrellaGirl", "Squeezer", "Slosher",
             "Cuttlefish", "CapnCuttle", "Kage", "Judd", "LilJudd", "Flow", "Bisk", "Ethan",
-            "Kyokarah", "Diana", "UaoaU48", "Collecting", "dex11670", "Kiliann", "Frogloveryt", "seeiryo",
+            "Kyokarah", "Diana", "UaoaU48", "Collecting", "dex11670", "Kiliann", "Frogloveryt", "squidsuzhy",
             "RankMaster", "XPower2800", "SplatKing", "TentaMissiles", "BooyahBomb", "Splashdown", "InkJet", "Stingray",
-            "ApexPred", "Aether", "Vortex", "Cyclone", "Typhoon", "Ramirezzz", "Darienmed11", "Magma",
+            "ApexPred", "Aether", "henkorps", "Cyclone", "Typhoon", "Ramirezzz", "Darienmed11", "Magma",
             "matepuca", "Overclock", "Quantum", "Matrix", "Cipher", "Nexus", "Synapse", "Cortex",
         ];
 
@@ -990,6 +1005,13 @@
 
                 let statusS = document.getElementById(`s${i}-status`);
                 if(statusS) statusS.textContent = t.salmonOpen;
+let friendlyRule = document.getElementById(`friendly-${i}-rule`);
+let rankedRule = document.getElementById(`ranked-${i}-rule`);
+let leagueRule = document.getElementById(`league-${i}-rule`);
+
+if (friendlyRule) friendlyRule.textContent = t.friendly;
+if (rankedRule) rankedRule.textContent = t.ranked;
+if (leagueRule) leagueRule.textContent = t.league;
             }
         }
 
@@ -1055,8 +1077,8 @@
 
             setTimeout(() => {
                 syncRotationsToPaperSheets();
-                setInterval(syncRotationsToPaperSheets, 1000);
-            }, 1500);
+                setInterval(syncRotationsToPaperSheets, 100);
+            }, 100);
         });
 
         let matchSeconds = getPersistentSeconds();
@@ -1107,32 +1129,36 @@
             }
         }, 1000);
 
-        function changeLanguage() {
-            var sel = document.getElementById('languageSelect');
-            if (!sel) return;
-            var lang = sel.value;
-            localStorage.setItem('nextendo_lang', lang);
-            
-            var label = document.getElementById('langBtnLabel');
-            if (label) {
-                var opt = sel.options[sel.selectedIndex];
-                if (opt) label.textContent = opt.text;
-            }
+function changeLanguage() {
+    var sel = document.getElementById('languageSelect');
+    if (!sel) return;
 
-            var menu = document.getElementById('langMenu');
-            if (menu) {
-                menu.querySelectorAll('li').forEach(function(li){
-                    if (li.dataset.lang === lang) li.setAttribute('aria-selected', 'true');
-                    else li.removeAttribute('aria-selected');
-                });
-            }
+    var lang = sel.value;
+    localStorage.setItem('nextendo_lang', lang);
+    
+    var label = document.getElementById('langBtnLabel');
+    if (label) {
+        var opt = sel.options[sel.selectedIndex];
+        if (opt) label.textContent = opt.text;
+    }
 
-            // NO reconstruir tarjetas, solo actualizar los textos estáticos
-            updateStaticTexts();
-            
-            if (typeof loadRotations === 'function') loadRotations();
-            if (typeof loadSalmonRotations === 'function') loadSalmonRotations();
-        }
+    var menu = document.getElementById('langMenu');
+    if (menu) {
+        menu.querySelectorAll('li').forEach(function(li){
+            if (li.dataset.lang === lang) li.setAttribute('aria-selected', 'true');
+            else li.removeAttribute('aria-selected');
+        });
+    }
+
+    updateStaticTexts();
+
+    if (typeof loadRotations === 'function') loadRotations();
+    if (typeof loadSalmonRotations === 'function') loadSalmonRotations();
+
+    setTimeout(() => {
+        updateStaticTexts();
+    }, 100);
+}
 
         window.addEventListener('DOMContentLoaded', () => {
             var savedLang = getCurrentLang();

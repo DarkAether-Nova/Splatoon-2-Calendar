@@ -326,6 +326,26 @@ body {
             text-overflow: ellipsis;
         }
 
+
+/* Hace que las imágenes de los mapas sean invisibles si no tienen un src asignado o está vacío */
+.map-img:not([src]), 
+.map-img[src=""],
+.salmon-current-map-img:not([src]), 
+.salmon-current-map-img[src=""],
+.sr-next-map:not([src]),
+.sr-next-map[src=""],
+.weapon-item img:not([src]),
+.weapon-item img[src=""] {
+    opacity: 0;
+}
+
+/* Efecto de desvanecimiento suave cuando la imagen por fin carga */
+.map-img, 
+.salmon-current-map-img, 
+.sr-next-map,
+.weapon-item img {
+    transition: opacity 0.3s ease-in;
+}
         .next-section {
             background: rgba(0, 0, 0, 0.65);
             border-radius: 16px;
