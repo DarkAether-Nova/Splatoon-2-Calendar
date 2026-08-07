@@ -1014,12 +1014,10 @@
                     const name2El = document.getElementById(`${m.cardPrefix}${i}-name2`);
                     const ruleEl = document.getElementById(`${m.cardPrefix === 'f' ? 'friendly' : m.cardPrefix === 'r' ? 'ranked' : 'league'}-${i}-rule`);
 
-                    if (img1 && map1 && img1.src !== map1) {
-    img1.src = map1;
-}
-if (img2 && map2 && img2.src !== map2) {
-    img2.src = map2;
-}
+                    if (img1 && map1) img1.src = map1;
+                    if (name1El && name1) name1El.textContent = name1;
+                    if (img2 && map2) img2.src = map2;
+                    if (name2El && name2) name2El.textContent = name2;
                     if (ruleEl && rule) ruleEl.textContent = rule;
                 }
             });
