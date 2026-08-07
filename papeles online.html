@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Splatoon 2 Nextendo</title>
+    <style>
+        @font-face {
+            font-family: 'Splatfont2';
+            src: url('BlitzBold.otf') format('opentype');
+        }
+        @font-face {
+            font-family: 'SplatfontMain';
+            src: url('Splatfont2.ttf') format('truetype');
+        }
+
+        :root {
+            --bg-dark: #222222;
+            --text-white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            background-image: url('backgraund.png');
+            background-repeat: repeat;
+            background-size: 1080px;
+            background-attachment: scroll;
+            font-family: 'SplatfontMain', 'Splatfont2', Arial, sans-serif;
+            color: var(--text-white);
+            overflow-x: hidden;
+        }
+
+        #page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #222222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: #fff;
+            font-size: 1.5rem;
+            transition: opacity 0.3s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: transparent;
+            border-bottom: none;
+        }
+
+        .header-left h1 {
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 2.2rem;
+            margin: 0;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        #languageSelect { display: none !important; }
+
+        .lang-selector { position: relative; }
+        .lang-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.2);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+        }
+        .lang-btn:hover { background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.4); }
+        .lang-btn-globe { font-size: 1rem; line-height: 1; }
+        .lang-btn-label { min-width: 68px; text-align: left; }
+        .lang-btn-caret { font-size: 0.75rem; opacity: .8; transition: transform .2s; }
+        .lang-selector.open .lang-btn { border-color: #ff7a1f; background: rgba(0,0,0,0.6); }
+        .lang-selector.open .lang-btn-caret { transform: rotate(180deg); }
+        .lang-menu {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            min-width: 100%; margin: 0; padding: 6px;
+            list-style: none;
+            background: #191a2c;
+            border: 2px solid rgba(255,255,255,0.14);
+            border-radius: 14px;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.6);
+            opacity: 0; visibility: hidden; transform: translateY(-6px);
+            transition: opacity .15s ease, transform .15s ease, visibility .15s;
+            z-index: 1000;
+        }
+        .lang-selector.open .lang-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .lang-menu li {
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
+            color: #cfd3e6;
+            padding: 9px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .12s, color .12s;
+        }
+        .lang-menu li:hover { background: rgba(255,122,31,0.18); color: #fff; }
+        .lang-menu li[aria-selected="true"] {
+            background: linear-gradient(90deg, #ff7a1f, #ff5c9a);
+            color: #fff;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+        }
+
+        .main-container {
+            max-width: 1600px;
+            margin: 20px auto 40px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .paper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .paper-sheet {
+            background: #fdfdfd;
+            color: #111;
+            border-radius: 4px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'SplatfontMain', Arial, sans-serif;
+            border: 1px solid #ccc;
+        }
+
+        .paper-sheet.no-room {
+            background: #dcdcdc !important;
+            filter: grayscale(30%);
+        }
+
+        .paper-sheet.no-room .paper-content,
+        .paper-sheet.no-room .tear-off-section {
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
+        .no-room-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(220, 220, 220, 0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .paper-sheet.no-room .no-room-overlay {
+            display: flex;
+        }
+
+        .no-room-badge {
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 2rem;
+            color: #d9534f;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border: 3px dashed #d9534f;
+            border-radius: 8px;
+            letter-spacing: 2px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: rotate(-5deg);
+        }
+
+        .paper-sheet:nth-child(4n+1) { transform: rotate(-1deg); }
+        .paper-sheet:nth-child(4n+2) { transform: rotate(1.2deg); }
+        .paper-sheet:nth-child(4n+3) { transform: rotate(-0.5deg); }
+        .paper-sheet:nth-child(4n+4) { transform: rotate(0.8deg); }
+
+        .paper-sheet::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 30px;
+            width: 70px;
+            height: 25px;
+            background: rgba(230, 225, 200, 0.65);
+            border-left: 2px dashed rgba(0,0,0,0.1);
+            border-right: 2px dashed rgba(0,0,0,0.1);
+            transform: rotate(-3deg);
+            z-index: 10;
+        }
+        .paper-sheet::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 35px;
+            width: 65px;
+            height: 24px;
+            background: rgba(230, 225, 200, 0.65);
+            border-left: 2px dashed rgba(0,0,0,0.1);
+            border-right: 2px dashed rgba(0,0,0,0.1);
+            transform: rotate(4deg);
+            z-index: 10;
+        }
+
+        .paper-header {
+            padding: 18px 20px 10px 20px;
+            background: #f4f4f4;
+            border-bottom: 2px dashed #ddd;
+        }
+
+        .paper-title {
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 1.3rem;
+            color: #111;
+            margin: 0 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .paper-mode-badge {
+            font-size: 0.9rem;
+            color: #555;
+            background: #e5e5e5;
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .paper-content {
+            padding: 15px 20px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .paper-maps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .paper-map-box {
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            background: #111;
+            border: 2px solid #ddd;
+        }
+
+        .paper-map-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            cursor: zoom-in;
+        }
+
+        .paper-map-name {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .paper-info-row {
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        .match-timer {
+            color: #d9534f;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.9rem;
+            background: #ffecec;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .tear-off-section {
+            border-top: 2px dashed #bbb;
+            background: #fafafa;
+            padding: 12px 0 0 0;
+            margin-top: auto;
+        }
+
+        .tear-off-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            text-align: center;
+            color: #777;
+            margin: 0 0 10px 0;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .tear-strips-container {
+            display: flex;
+            width: 100%;
+            height: 110px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .tear-strip {
+            flex: 1;
+            border-right: 1px dashed #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 3px;
+            background: #fff;
+            transition: background 0.2s;
+        }
+
+        .tear-strip.disconnected {
+            background: transparent;
+            border-right: 1px dashed #ccc;
+        }
+
+        .tear-strip:last-child {
+            border-right: none;
+        }
+
+        .tear-strip span {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #000000;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+
+        .tear-strip.disconnected span {
+            visibility: hidden;
+        }
+
+        .salmon-sheet-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .salmon-weapons-grid {
+            display: flex;
+            gap: 6px;
+            justify-content: space-between;
+            background: #f0f0f0;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .salmon-sheet-wep {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 50%;
+            padding: 3px;
+            border: 1px solid #ddd;
+        }
+
+        .nx-footer {
+            max-width: 1600px;
+            margin: 40px auto 20px;
+            padding: 22px 24px;
+            border-top: 2px solid rgba(255,255,255,0.12);
+            text-align: center;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.55;
+        }
+        .nx-footer-disc { max-width: 820px; margin: 0 auto 10px; font-size: 0.82rem; }
+        .nx-footer-credit { margin: 6px 0; font-size: 0.95rem; }
+        .nx-footer-credit strong { color: #fff; }
+        .nx-footer-links {
+            margin-top: 10px;
+            display: flex; gap: 12px;
+            justify-content: center; align-items: center;
+            flex-wrap: wrap; font-weight: bold; font-size: 1rem;
+        }
+        .nx-footer a { color: #ff7a1f; text-decoration: none; }
+        .nx-footer a:hover { text-decoration: underline; }
+        .nx-footer-links span { opacity: 0.4; }
+
+        #imgLightbox {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88); z-index: 9999;
+            justify-content: center; align-items: center; flex-direction: column;
+            cursor: zoom-out;
+        }
+        #imgLightbox.open { display: flex; }
+        #imgLightboxImg {
+            width: min(90vw, 1000px); height: auto; max-height: 80vh;
+            object-fit: contain; border-radius: 12px;
+            box-shadow: 0 14px 50px rgba(0,0,0,0.75);
+            border: 3px solid rgba(255,255,255,0.15);
+        }
+        #imgLightboxCap {
+            margin-top: 20px; font-family: 'Splatfont2', sans-serif;
+            color: #fff; font-size: 1.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.85);
+        }
+    </style>
+</head>
+<body>
+
+<!-- CONTENEDOR OCULTO PARA QUE combates.js LEA LOS DATOS -->
+<div id="hidden-rotation-data" style="display: none;">
+    <!-- Territorial (Friendly) -->
+    <span id="friendly-current-rule"></span>
+    <span id="friendly-current-time"></span>
+    <img id="f-curr-map1" src=""><p id="f-curr-name1"></p>
+    <img id="f-curr-map2" src=""><p id="f-curr-name2"></p>
+    <span id="friendly-next-rule"></span>
+    <span id="friendly-timer"></span>
+    <span id="friendly-next-time-range"></span>
+    <img id="f-next-map1" src=""><p id="f-next-name1"></p>
+    <img id="f-next-map2" src=""><p id="f-next-name2"></p>
+
+    <!-- Competitivo (Ranked) -->
+    <span id="ranked-current-rule"></span>
+    <span id="ranked-current-time"></span>
+    <img id="r-curr-map1" src=""><p id="r-curr-name1"></p>
+    <img id="r-curr-map2" src=""><p id="r-curr-name2"></p>
+    <span id="ranked-next-rule"></span>
+    <span id="ranked-timer"></span>
+    <span id="ranked-next-time-range"></span>
+    <img id="r-next-map1" src=""><p id="r-next-name1"></p>
+    <img id="r-next-map2" src=""><p id="r-next-name2"></p>
+
+    <!-- Liga (League) -->
+    <span id="league-current-rule"></span>
+    <span id="league-current-time"></span>
+    <img id="l-curr-map1" src=""><p id="l-curr-name1"></p>
+    <img id="l-curr-map2" src=""><p id="l-curr-name2"></p>
+    <span id="league-next-rule"></span>
+    <span id="league-timer"></span>
+    <span id="league-next-time-range"></span>
+    <img id="l-next-map1" src=""><p id="l-next-name1"></p>
+    <img id="l-next-map2" src=""><p id="l-next-name2"></p>
+
+    <!-- Splatfest -->
+    <span id="splatfest-current-rule"></span>
+    <span id="splatfest-current-time"></span>
+    <img id="sf-curr-map1" src=""><p id="sf-curr-name1"></p>
+    <img id="sf-curr-map2" src=""><p id="sf-curr-name2"></p>
+    <span id="splatfest-next-rule"></span>
+    <span id="splatfest-timer"></span>
+    <span id="splatfest-next-time-range"></span>
+    <img id="sf-next-map1" src=""><p id="sf-next-name1"></p>
+    <img id="sf-next-map2" src=""><p id="sf-next-name2"></p>
+
+    <!-- Salmon Run -->
+    <span id="salmon-time"></span>
+    <span id="salmon-restante"></span>
+    <img id="salmon-map-img" src=""><p id="salmon-map-name"></p>
+    <img id="salmon-w1" src="">
+    <img id="salmon-w2" src="">
+    <img id="salmon-w3" src="">
+    <img id="salmon-w4" src="">
+    <div id="salmon-next-list"></div>
+    <span id="txt-salmon-current"></span>
+    <span id="txt-salmon-next"></span>
+</div>
+
+    <div id="page-loader">Cargando rotaciones...</div>
+    <script>
+        const pageTranslations = {
+            es: {
+                loader: "Cargando rotaciones...",
+                navMore: "Rotacion de mapas",
+                navSplatfest: "Splatfest",
+                room: "Sala",
+                players: "Jugadores",
+                team: "Equipo",
+                noRoom: "SIN SALA",
+                friendly: "Territorial",
+                ranked: "Competitivo",
+                league: "Liga",
+                salmonOpen: "Abierto",
+                footerDisc: "Este sitio no está afiliado a Nintendo. Todos los nombres de productos, logotipos y marcas pertenecen a sus respectivos dueños.",
+                footerCredit: "Calendario original por",
+                footerHosted: "alojado por"
+            },
+            en: {
+                loader: "Loading rotations...",
+                navMore: "Map rotation",
+                navSplatfest: "Splatfest",
+                room: "Room",
+                players: "Players",
+                team: "Team",
+                noRoom: "NO ROOM",
+                friendly: "Turf War",
+                ranked: "Ranked",
+                league: "League",
+                salmonOpen: "Open",
+                footerDisc: "This site is not affiliated with Nintendo. All product names, logos, and brands belong to their respective owners.",
+                footerCredit: "Original calendar by",
+                footerHosted: "hosted by"
+            },
+            fr: {
+                loader: "Chargement des rotations...",
+                navMore: "Rotation des cartes",
+                navSplatfest: "Splatfest",
+                room: "Salon",
+                players: "Joueurs",
+                team: "Équipe",
+                noRoom: "PAS DE SALON",
+                friendly: "Guerre de Territoire",
+                ranked: "Match Pro",
+                league: "Match League",
+                salmonOpen: "Ouvert",
+                footerDisc: "Ce site n'est pas affilié à Nintendo. Tous les noms de produits, logos et marques appartiennent à leurs propriétaires respectifs.",
+                footerCredit: "Calendrier original par",
+                footerHosted: "hébergé par"
+            },
+            pt: {
+                loader: "Carregando rotações...",
+                navMore: "Rotação de mapas",
+                navSplatfest: "Splatfest",
+                room: "Sala",
+                players: "Jogadores",
+                team: "Equipe",
+                noRoom: "SEM SALA",
+                friendly: "Disputa Territorial",
+                ranked: "Ranqueada",
+                league: "Liga",
+                salmonOpen: "Aberto",
+                footerDisc: "Este site não é afiliado à Nintendo. Todos os nomes de produtos, logotipos e marcas pertencem aos seus respectivos proprietários.",
+                footerCredit: "Calendário original por",
+                footerHosted: "hospedado por"
+            }
+        };
+
+        function getCurrentLang() {
+            let lang = localStorage.getItem("nextendo_lang");
+            if (!lang || !pageTranslations[lang]) {
+                let n = (navigator.language || "es").slice(0, 2).toLowerCase();
+                lang = pageTranslations[n] ? n : "es";
+            }
+            return lang;
+        }
+
+        (function () {
+            var lang = getCurrentLang();
+            var el = document.getElementById("page-loader");
+            if (el && pageTranslations[lang]) el.textContent = pageTranslations[lang].loader;
+        })();
+    </script>
+
+    <header>
+        <div class="header-left">
+            <h1 id="main-title">NEXTENDO NETWORK / SPLATOON 2</h1>
+        </div>
+        <div class="header-right">
+            <div class="nav-buttons-container">
+                <a href="index.html" class="nav-btn" id="nav-moreinfo">Rotacion de mapas</a>
+                <a href="partidas_splatfest.html" class="nav-btn" id="nav-splatfest">Splatfest</a>
+            </div>
+            <div class="lang-selector" id="langSelector">
+                <select id="languageSelect" onchange="changeLanguage()" aria-hidden="true" tabindex="-1">
+                    <option value="es">Español</option>
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="pt">Português</option>
+                </select>
+                <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="lang-btn-globe" aria-hidden="true">🌐</span>
+                    <span class="lang-btn-label" id="langBtnLabel">Español</span>
+                    <span class="lang-btn-caret" aria-hidden="true">▾</span>
+                </button>
+                <ul class="lang-menu" id="langMenu" role="listbox">
+                    <li role="option" data-lang="es">Español</li>
+                    <li role="option" data-lang="en">English</li>
+                    <li role="option" data-lang="fr">Français</li>
+                    <li role="option" data-lang="pt">Português</li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="paper-grid" id="papersGridContainer"></div>
+    </div>
+
+    <footer class="nx-footer">
+        <p class="nx-footer-disc" id="footer-disc"></p>
+        <p class="nx-footer-credit">
+            <span id="footer-credit-text"></span>
+            <a href="https://github.com/darkaether-nova" target="_blank" rel="noopener">darkaether-nova</a>
+            &nbsp;·&nbsp; <span id="footer-hosted-text"></span> <strong>Nextendo&nbsp;Network</strong>
+        </p>
+        <nav class="nx-footer-links">
+            <a href="https://nextendo.network" target="_blank" rel="noopener">Nextendo Network</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://discord.gg/XPfeCMwnzQ" target="_blank" rel="noopener">Discord</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://github.com/NextendoNetwork" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="combates.js"></script>
+    <script src="salmon_rotations.js"></script>
+
+    <script>
+        const playerNamesPool = [
+            "Kazu", "Neku", "MiguelGuias", "Avgustoo", "Tenta1", "Inkling07", "drexven", "Mars",
+            "Kuro", "Shiro", "Alpha", "Beta", "Gamma", "Delta", "Omega", "Sigma",
+            "Splat99", "RollerPro", "ChargerX", "BlasterZ", "Dualies", "BrellaGirl", "Squeezer", "Slosher",
+            "Cuttlefish", "CapnCuttle", "Kage", "Judd", "LilJudd", "Flow", "Bisk", "Ethan",
+            "Kyokarah", "Diana", "UaoaU48", "Collecting", "dex11670", "Kiliann", "Frogloveryt", "seeiryo",
+            "RankMaster", "XPower2800", "SplatKing", "TentaMissiles", "BooyahBomb", "Splashdown", "InkJet", "Stingray",
+            "ApexPred", "Aether", "Vortex", "Cyclone", "Typhoon", "Ramirezzz", "Darienmed11", "Magma",
+            "matepuca", "Overclock", "Quantum", "Matrix", "Cipher", "Nexus", "Synapse", "Cortex",
+        ];
+
+        function checkCardNoRoom(storageKey) {
+            let savedRoomState = JSON.parse(localStorage.getItem(storageKey + '_noroom'));
+            if (savedRoomState !== null) return savedRoomState;
+            let isNoRoom = Math.random() < 0.25;
+            localStorage.setItem(storageKey + '_noroom', JSON.stringify(isNoRoom));
+            return isNoRoom;
+        }
+
+        function generateTearStrips(totalSlots, storageKey) {
+            let savedData = JSON.parse(localStorage.getItem(storageKey));
+            if (savedData && Array.isArray(savedData)) {
+                let html = '';
+                for (let i = 0; i < totalSlots; i++) {
+                    if (savedData[i].disconnected) {
+                        html += `<div class="tear-strip disconnected"><span>-</span></div>`;
+                    } else {
+                        html += `<div class="tear-strip"><span>${savedData[i].name}</span></div>`;
+                    }
+                }
+                return html;
+            }
+
+            let shuffled = [...playerNamesPool].sort(() => Math.random() - 0.5);
+            let selected = shuffled.slice(0, totalSlots);
+            let dcCount = Math.floor(Math.random() * 2) + 1; 
+            let dcIndices = [];
+            while(dcIndices.length < dcCount) {
+                let idx = Math.floor(Math.random() * totalSlots);
+                if(!dcIndices.includes(idx)) dcIndices.push(idx);
+            }
+
+            let stripData = [];
+            let html = '';
+            for(let i = 0; i < totalSlots; i++) {
+                if(dcIndices.includes(i)) {
+                    stripData.push({ disconnected: true, name: '' });
+                    html += `<div class="tear-strip disconnected"><span>-</span></div>`;
+                } else {
+                    let playerName = selected.pop();
+                    stripData.push({ disconnected: false, name: playerName });
+                    html += `<div class="tear-strip"><span>${playerName}</span></div>`;
+                }
+            }
+
+            localStorage.setItem(storageKey, JSON.stringify(stripData));
+            return html;
+        }
+
+        function refreshAllPlayers(forceNew = false) {
+            const modes = ['f', 'r', 'l'];
+            modes.forEach(mode => {
+                for (let i = 1; i <= 4; i++) {
+                    let key = `players_${mode}${i}`;
+                    if (forceNew) {
+                        localStorage.removeItem(key);
+                        localStorage.removeItem(key + '_noroom');
+                    }
+                    let container = document.getElementById(`${mode}${i}-players`);
+                    let sheetCard = document.getElementById(`sheet-${mode}${i}`);
+                    let isNoRoom = checkCardNoRoom(key);
+
+                    if (sheetCard) {
+                        if (isNoRoom) sheetCard.classList.add('no-room');
+                        else sheetCard.classList.remove('no-room');
+                    }
+
+                    if (container) {
+                        if (isNoRoom) {
+                            let emptyHtml = '';
+                            for (let j = 0; j < 8; j++) {
+                                emptyHtml += `<div class="tear-strip disconnected"><span>-</span></div>`;
+                            }
+                            container.innerHTML = emptyHtml;
+                        } else {
+                            container.innerHTML = generateTearStrips(8, key);
+                        }
+                    }
+                }
+            });
+
+            for (let i = 1; i <= 4; i++) {
+                let key = `players_s${i}`;
+                if (forceNew) {
+                    localStorage.removeItem(key);
+                    localStorage.removeItem(key + '_noroom');
+                }
+                let container = document.getElementById(`s${i}-players`);
+                let sheetCard = document.getElementById(`sheet-s${i}`);
+                let isNoRoom = checkCardNoRoom(key);
+
+                if (sheetCard) {
+                    if (isNoRoom) sheetCard.classList.add('no-room');
+                    else sheetCard.classList.remove('no-room');
+                }
+
+                if (container) {
+                    if (isNoRoom) {
+                        let emptyHtml = '';
+                        for (let j = 0; j < 4; j++) {
+                            emptyHtml += `<div class="tear-strip disconnected"><span>-</span></div>`;
+                        }
+                        container.innerHTML = emptyHtml;
+                    } else {
+                        container.innerHTML = generateTearStrips(4, key);
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('page-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 300);
+            }
+        });
+
+        function getFormattedCurrentTime() {
+            let savedTime = localStorage.getItem('nextendo_timer_val');
+            let savedTimestamp = localStorage.getItem('nextendo_timestamp');
+            let now = Date.now();
+            let currentSeconds = 180;
+
+            if (savedTime && savedTimestamp) {
+                let elapsedSeconds = Math.floor((now - parseInt(savedTimestamp)) / 1000);
+                currentSeconds = parseInt(savedTime) - elapsedSeconds;
+
+                if (currentSeconds <= 0) {
+                    let totalSecondsPassed = elapsedSeconds;
+                    currentSeconds = 180 - (totalSecondsPassed % 180);
+                    refreshAllPlayers(true);
+                }
+            } else {
+                localStorage.setItem('nextendo_timestamp', now);
+                localStorage.setItem('nextendo_timer_val', 180);
+            }
+
+            let m = Math.floor(currentSeconds / 60);
+            let s = currentSeconds % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function buildSheetsStructure() {
+            const container = document.getElementById('papersGridContainer');
+            if (!container) return;
+            
+            let lang = getCurrentLang();
+            let t = pageTranslations[lang] || pageTranslations.es;
+            let initialTimeStr = getFormattedCurrentTime();
+            let html = '';
+
+            // Amistoso
+            for (let i = 1; i <= 4; i++) {
+                html += `
+                <div class="paper-sheet" id="sheet-f${i}">
+                    <div class="no-room-overlay"><div class="no-room-badge" id="noroom-f${i}">${t.noRoom}</div></div>
+                    <div class="paper-header">
+                        <div class="paper-title"><img src="amistoso.png" style="width:24px;height:24px;" alt=""> <span id="room-f${i}">${t.room} ${i}</span></div>
+                        <span class="paper-mode-badge" id="friendly-${i}-rule">${t.friendly}</span>
+                    </div>
+                    <div class="paper-content">
+                        <div class="paper-maps-container">
+                            <div class="paper-map-box"><img id="f${i}-map1" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="f${i}-name1" class="paper-map-name">-</p></div>
+                            <div class="paper-map-box"><img id="f${i}-map2" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="f${i}-name2" class="paper-map-name">-</p></div>
+                        </div>
+                        <div class="paper-info-row">
+                            <span class="match-timer" id="f${i}-timer">${initialTimeStr}</span>
+                        </div>
+                    </div>
+                    <div class="tear-off-section">
+                        <p class="tear-off-title" id="players-f${i}">${t.players}</p>
+                        <div class="tear-strips-container" id="f${i}-players"></div>
+                    </div>
+                </div>`;
+            }
+
+            // Competitivo
+            for (let i = 1; i <= 4; i++) {
+                html += `
+                <div class="paper-sheet" id="sheet-r${i}">
+                    <div class="no-room-overlay"><div class="no-room-badge" id="noroom-r${i}">${t.noRoom}</div></div>
+                    <div class="paper-header">
+                        <div class="paper-title"><img src="competitivo.png" style="width:24px;height:24px;" alt=""> <span id="room-r${i}">${t.room} ${i}</span></div>
+                        <span class="paper-mode-badge" id="ranked-${i}-rule">${t.ranked}</span>
+                    </div>
+                    <div class="paper-content">
+                        <div class="paper-maps-container">
+                            <div class="paper-map-box"><img id="r${i}-map1" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="r${i}-name1" class="paper-map-name">-</p></div>
+                            <div class="paper-map-box"><img id="r${i}-map2" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="r${i}-name2" class="paper-map-name">-</p></div>
+                        </div>
+                        <div class="paper-info-row">
+                            <span class="match-timer" id="r${i}-timer">${initialTimeStr}</span>
+                        </div>
+                    </div>
+                    <div class="tear-off-section">
+                        <p class="tear-off-title" id="players-r${i}">${t.players}</p>
+                        <div class="tear-strips-container" id="r${i}-players"></div>
+                    </div>
+                </div>`;
+            }
+
+            // Liga
+            for (let i = 1; i <= 4; i++) {
+                html += `
+                <div class="paper-sheet" id="sheet-l${i}">
+                    <div class="no-room-overlay"><div class="no-room-badge" id="noroom-l${i}">${t.noRoom}</div></div>
+                    <div class="paper-header">
+                        <div class="paper-title"><img src="toreno.png" style="width:24px;height:24px;" alt=""> <span id="room-l${i}">${t.room} ${i}</span></div>
+                        <span class="paper-mode-badge" id="league-${i}-rule">${t.league}</span>
+                    </div>
+                    <div class="paper-content">
+                        <div class="paper-maps-container">
+                            <div class="paper-map-box"><img id="l${i}-map1" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="l${i}-name1" class="paper-map-name">-</p></div>
+                            <div class="paper-map-box"><img id="l${i}-map2" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="l${i}-name2" class="paper-map-name">-</p></div>
+                        </div>
+                        <div class="paper-info-row">
+                            <span class="match-timer" id="l${i}-timer">${initialTimeStr}</span>
+                        </div>
+                    </div>
+                    <div class="tear-off-section">
+                        <p class="tear-off-title" id="players-l${i}">${t.players}</p>
+                        <div class="tear-strips-container" id="l${i}-players"></div>
+                    </div>
+                </div>`;
+            }
+
+            // Salmon Run
+            for (let i = 1; i <= 4; i++) {
+                html += `
+                <div class="paper-sheet" id="sheet-s${i}">
+                    <div class="no-room-overlay"><div class="no-room-badge" id="noroom-s${i}">${t.noRoom}</div></div>
+                    <div class="paper-header">
+                        <div class="paper-title"><img src="salmon-icon.png" style="width:24px;height:24px;" alt=""> <span id="room-s${i}">${t.room} ${i}</span></div>
+                        <span class="paper-mode-badge" id="s${i}-status">${t.salmonOpen}</span>
+                    </div>
+                    <div class="paper-content salmon-sheet-content">
+                        <div class="paper-map-box">
+                            <img id="s${i}-map-img" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt="">
+                            <p id="s${i}-map-name" class="paper-map-name">-</p>
+                        </div>
+                        <div class="paper-info-row" style="font-size: 0.85rem; justify-content: flex-end;">
+                            <span class="match-timer" id="s${i}-timer">${initialTimeStr}</span>
+                        </div>
+                        <div class="salmon-weapons-grid">
+                            <img id="s${i}-w1" src="" class="salmon-sheet-wep" alt="W1">
+                            <img id="s${i}-w2" src="" class="salmon-sheet-wep" alt="W2">
+                            <img id="s${i}-w3" src="" class="salmon-sheet-wep" alt="W3">
+                            <img id="s${i}-w4" src="" class="salmon-sheet-wep" alt="W4">
+                        </div>
+                    </div>
+                    <div class="tear-off-section">
+                        <p class="tear-off-title" id="players-s${i}">${t.players}</p>
+                        <div class="tear-strips-container" id="s${i}-players"></div>
+                    </div>
+                </div>`;
+            }
+
+            container.innerHTML = html;
+            refreshAllPlayers(false);
+        }
+
+        buildSheetsStructure();
+        updateStaticTexts();
+
+        function updateStaticTexts() {
+            let lang = getCurrentLang();
+            let t = pageTranslations[lang] || pageTranslations.es;
+
+            const navMore = document.getElementById("nav-moreinfo");
+            const navSplatfest = document.getElementById("nav-splatfest");
+            const footerDisc = document.getElementById("footer-disc");
+            const footerCreditText = document.getElementById("footer-credit-text");
+            const footerHostedText = document.getElementById("footer-hosted-text");
+
+            if (navMore) navMore.textContent = t.navMore;
+            if (navSplatfest) navSplatfest.textContent = t.navSplatfest;
+            if (footerDisc) footerDisc.textContent = t.footerDisc;
+            if (footerCreditText) footerCreditText.textContent = t.footerCredit;
+            if (footerHostedText) footerHostedText.textContent = t.footerHosted;
+
+            for (let i = 1; i <= 4; i++) {
+                let roomF = document.getElementById(`room-f${i}`);
+                let roomR = document.getElementById(`room-r${i}`);
+                let roomL = document.getElementById(`room-l${i}`);
+                let roomS = document.getElementById(`room-s${i}`);
+
+                if(roomF) roomF.textContent = `${t.room} ${i}`;
+                if(roomR) roomR.textContent = `${t.room} ${i}`;
+                if(roomL) roomL.textContent = `${t.room} ${i}`;
+                if(roomS) roomS.textContent = `${t.room} ${i}`;
+
+                let playersF = document.getElementById(`players-f${i}`);
+                let playersR = document.getElementById(`players-r${i}`);
+                let playersL = document.getElementById(`players-l${i}`);
+                let playersS = document.getElementById(`players-s${i}`);
+
+                if(playersF) playersF.textContent = t.players;
+                if(playersR) playersR.textContent = t.players;
+                if(playersL) playersL.textContent = t.players;
+                if(playersS) playersS.textContent = t.players;
+
+                let noroomF = document.getElementById(`noroom-f${i}`);
+                let noroomR = document.getElementById(`noroom-r${i}`);
+                let noroomL = document.getElementById(`noroom-l${i}`);
+                let noroomS = document.getElementById(`noroom-s${i}`);
+
+                if(noroomF) noroomF.textContent = t.noRoom;
+                if(noroomR) noroomR.textContent = t.noRoom;
+                if(noroomL) noroomL.textContent = t.noRoom;
+                if(noroomS) noroomS.textContent = t.noRoom;
+
+                let statusS = document.getElementById(`s${i}-status`);
+                if(statusS) statusS.textContent = t.salmonOpen;
+            }
+        }
+
+        function syncRotationsToPaperSheets() {
+            const modes = [
+                { id: 'f', srcPrefix: 'f-curr', titlePrefix: 'f-curr', ruleId: 'friendly-current-rule', cardPrefix: 'f' },
+                { id: 'r', srcPrefix: 'r-curr', titlePrefix: 'r-curr', ruleId: 'ranked-current-rule', cardPrefix: 'r' },
+                { id: 'l', srcPrefix: 'l-curr', titlePrefix: 'l-curr', ruleId: 'league-current-rule', cardPrefix: 'l' }
+            ];
+
+            modes.forEach(m => {
+                const map1 = document.getElementById(m.srcPrefix + '-map1')?.src;
+                const name1 = document.getElementById(m.titlePrefix + '-name1')?.textContent;
+                const map2 = document.getElementById(m.srcPrefix + '-map2')?.src;
+                const name2 = document.getElementById(m.titlePrefix + '-name2')?.textContent;
+                const rule = document.getElementById(m.ruleId)?.textContent;
+
+                for (let i = 1; i <= 4; i++) {
+                    const img1 = document.getElementById(`${m.cardPrefix}${i}-map1`);
+                    const name1El = document.getElementById(`${m.cardPrefix}${i}-name1`);
+                    const img2 = document.getElementById(`${m.cardPrefix}${i}-map2`);
+                    const name2El = document.getElementById(`${m.cardPrefix}${i}-name2`);
+                    const ruleEl = document.getElementById(`${m.cardPrefix === 'f' ? 'friendly' : m.cardPrefix === 'r' ? 'ranked' : 'league'}-${i}-rule`);
+
+                    if (img1 && map1 && img1.src !== map1) {
+    img1.src = map1;
+}
+if (img2 && map2 && img2.src !== map2) {
+    img2.src = map2;
+}
+                    if (ruleEl && rule) ruleEl.textContent = rule;
+                }
+            });
+
+            const sMapImg = document.getElementById('salmon-map-img')?.src;
+            const sMapName = document.getElementById('salmon-map-name')?.textContent;
+            const sw1 = document.getElementById('salmon-w1')?.src;
+            const sw2 = document.getElementById('salmon-w2')?.src;
+            const sw3 = document.getElementById('salmon-w3')?.src;
+            const sw4 = document.getElementById('salmon-w4')?.src;
+
+            for (let i = 1; i <= 4; i++) {
+                const targetImg = document.getElementById(`s${i}-map-img`);
+                const targetName = document.getElementById(`s${i}-map-name`);
+                
+                if (targetImg && sMapImg) targetImg.src = sMapImg;
+                if (targetName && sMapName) targetName.textContent = sMapName;
+
+                if (sw1) {
+                    const w1 = document.getElementById(`s${i}-w1`);
+                    const w2 = document.getElementById(`s${i}-w2`);
+                    const w3 = document.getElementById(`s${i}-w3`);
+                    const w4 = document.getElementById(`s${i}-w4`);
+                    if (w1) w1.src = sw1;
+                    if (w2) w2.src = sw2;
+                    if (w3) w3.src = sw3;
+                    if (w4) w4.src = sw4;
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof loadRotations === 'function') loadRotations();
+            if (typeof loadSalmonRotations === 'function') loadSalmonRotations();
+
+            setTimeout(() => {
+                syncRotationsToPaperSheets();
+                setInterval(syncRotationsToPaperSheets, 1000);
+            }, 1500);
+        });
+
+        let matchSeconds = getPersistentSeconds();
+
+        function getPersistentSeconds() {
+            let savedTime = localStorage.getItem('nextendo_timer_val');
+            let savedTimestamp = localStorage.getItem('nextendo_timestamp');
+            let now = Date.now();
+            let currentSeconds = 180;
+
+            if (savedTime && savedTimestamp) {
+                let elapsedSeconds = Math.floor((now - parseInt(savedTimestamp)) / 1000);
+                currentSeconds = parseInt(savedTime) - elapsedSeconds;
+                if (currentSeconds <= 0) {
+                    currentSeconds = 180 - (elapsedSeconds % 180);
+                    refreshAllPlayers(true);
+                }
+            } else {
+                localStorage.setItem('nextendo_timestamp', now);
+                localStorage.setItem('nextendo_timer_val', 180);
+            }
+            return currentSeconds;
+        }
+
+        setInterval(() => {
+            matchSeconds--;
+            if (matchSeconds < 0) {
+                matchSeconds = 180;
+                refreshAllPlayers(true);
+            }
+
+            localStorage.setItem('nextendo_timer_val', matchSeconds);
+            localStorage.setItem('nextendo_timestamp', Date.now());
+
+            let m = Math.floor(matchSeconds / 60);
+            let s = matchSeconds % 60;
+            let timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+            for (let mode of ['f', 'r', 'l']) {
+                for (let i = 1; i <= 4; i++) {
+                    let timerEl = document.getElementById(`${mode}${i}-timer`);
+                    if (timerEl) timerEl.textContent = timeStr;
+                }
+            }
+            for (let i = 1; i <= 4; i++) {
+                let timerEl = document.getElementById(`s${i}-timer`);
+                if (timerEl) timerEl.textContent = timeStr;
+            }
+        }, 1000);
+
+        function changeLanguage() {
+            var sel = document.getElementById('languageSelect');
+            if (!sel) return;
+            var lang = sel.value;
+            localStorage.setItem('nextendo_lang', lang);
+            
+            var label = document.getElementById('langBtnLabel');
+            if (label) {
+                var opt = sel.options[sel.selectedIndex];
+                if (opt) label.textContent = opt.text;
+            }
+
+            var menu = document.getElementById('langMenu');
+            if (menu) {
+                menu.querySelectorAll('li').forEach(function(li){
+                    if (li.dataset.lang === lang) li.setAttribute('aria-selected', 'true');
+                    else li.removeAttribute('aria-selected');
+                });
+            }
+
+            // NO reconstruir tarjetas, solo actualizar los textos estáticos
+            updateStaticTexts();
+            
+            if (typeof loadRotations === 'function') loadRotations();
+            if (typeof loadSalmonRotations === 'function') loadSalmonRotations();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            var savedLang = getCurrentLang();
+            var sel = document.getElementById('languageSelect');
+            if (sel) {
+                sel.value = savedLang;
+                var label = document.getElementById('langBtnLabel');
+                if (label) {
+                    for (var i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === savedLang) {
+                            label.textContent = sel.options[i].text;
+                            break;
+                        }
+                    }
+                }
+                var menu = document.getElementById('langMenu');
+                if (menu) {
+                    menu.querySelectorAll('li').forEach(function(li){
+                        if (li.dataset.lang === savedLang) li.setAttribute('aria-selected', 'true');
+                        else li.removeAttribute('aria-selected');
+                    });
+                }
+            }
+        });
+
+        // Funciones globales para el lightbox de imágenes
+        window.openImgLightbox = function(src, cap) {
+            const box = document.getElementById('imgLightbox');
+            const img = document.getElementById('imgLightboxImg');
+            const caption = document.getElementById('imgLightboxCap');
+            if (box && img) {
+                img.src = src;
+                if (caption) caption.textContent = cap || '';
+                box.classList.add('open');
+            }
+        };
+
+        window.closeImgLightbox = function() {
+            const box = document.getElementById('imgLightbox');
+            if (box) box.classList.remove('open');
+        };
+    </script>
+
+    <script>
+        (function () {
+            var wrap = document.getElementById('langSelector');
+            var sel = document.getElementById('languageSelect');
+            var btn = document.getElementById('langBtn');
+            var menu = document.getElementById('langMenu');
+            if (!wrap || !sel || !btn || !menu) return;
+            function close() { wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var open = wrap.classList.toggle('open');
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+            menu.addEventListener('click', function (e) {
+                var li = e.target.closest('li[data-lang]');
+                if (!li) return;
+                sel.value = li.dataset.lang;
+                changeLanguage();
+                close();
+            });
+            document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) close(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+        })();
+    </script>
+
+    <div id="imgLightbox" onclick="closeImgLightbox()">
+        <img id="imgLightboxImg" src="" alt="">
+        <div id="imgLightboxCap"></div>
+    </div>
+</body>
+</html>
