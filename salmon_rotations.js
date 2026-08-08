@@ -91,15 +91,51 @@ const salmonRotations = [
     }
 ];
 
+const salmonTexts = {
+    es: { closed: "¡Cerrado!", open: "¡Abierto!", opensAt: "Abre: " },
+    en: { closed: "Closed!", open: "Open!", opensAt: "Opens: " },
+    fr: { closed: "Fermé !", open: "Ouvert !", opensAt: "Ouvre : " },
+    pt: { closed: "Fechado!", open: "Aberto!", opensAt: "Abre: " }
+};
+
+function setSalmonRunStatus(isOpen, openingTimeStr = "") {
+    const openView = document.getElementById('salmon-open-view');
+    const closedView = document.getElementById('salmon-closed-view');
+    const badgeCurrent = document.getElementById('txt-salmon-current');
+    const tiempoRestante = document.getElementById('salmon-restante');
+    const timeEl = document.getElementById('salmon-time');
+
+    const lang = document.getElementById('languageSelect') ? document.getElementById('languageSelect').value : 'es';
+    const tLang = salmonTexts[lang] || salmonTexts.es;
+
+    if (isOpen) {
+        if (openView) openView.style.display = 'flex';
+        if (closedView) closedView.style.display = 'none';
+        if (badgeCurrent) {
+            badgeCurrent.textContent = tLang.open;
+            badgeCurrent.style.background = ""; 
+        }
+        if (tiempoRestante) tiempoRestante.style.display = 'block';
+    } else {
+        if (openView) openView.style.display = 'none';
+        if (closedView) closedView.style.display = 'block';
+        if (badgeCurrent) {
+            badgeCurrent.textContent = tLang.closed;
+            badgeCurrent.style.background = "repeating-linear-gradient(45deg, #e74c3c, #e74c3c 10px, #c0392b 10px, #c0392b 20px)";
+        }
+        if (tiempoRestante) tiempoRestante.style.display = 'none';
+        if (timeEl && openingTimeStr) {
+            timeEl.innerText = `${tLang.opensAt} ${openingTimeStr}`;
+        }
+    }
+}
+
 function formatCustomDate(dateStr, lang = 'es') {
     const date = new Date(dateStr);
     const options = { weekday: 'short', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
     return date.toLocaleDateString(lang === 'es' ? 'es-ES' : lang, options);
 }
 
-// Nom du stage Salmon Run dans la langue demandée. Les données n'ont pas de clé
-// "fr" (d'où le retour en espagnol) : on retombe alors sur les noms officiels
-// Nextendo (SALMON_NAMES, défini dans combates.js), reliés par le nom anglais.
 function salmonStageName(stage, lang) {
     if (typeof stage !== 'object' || stage === null) return stage || '';
     if (stage[lang]) return stage[lang];
@@ -111,7 +147,6 @@ function salmonStageName(stage, lang) {
     return stage.en || stage.es || '';
 }
 
-// "dans Xj Xh Xm" — compte à rebours jusqu'au début d'un créneau (façon splatoon2.ink).
 function salmonCountdownStr(targetMs, t, u) {
     const pre = (t && t.inPrefix) ? t.inPrefix : 'en';
     const diff = targetMs - Date.now();
@@ -146,9 +181,6 @@ function updateSalmonRunDynamic() {
         }
     }
 
-    // Filet de sécurité : le jeu de données Salmon est FIXE et court (il "expire" le 13/08).
-    // Pour que "Prochain" ne soit JAMAIS vide (date proche/au-delà de la fin des données),
-    // on complète en bouclant sur le début du jeu de données.
     if (nextEvents.length < 3 && salmonRotations.length) {
         let k = 0;
         while (nextEvents.length < 3) { nextEvents.push(salmonRotations[k % salmonRotations.length]); k++; }
@@ -178,19 +210,17 @@ function updateSalmonRunDynamic() {
                 }
             }
         }
-        if (typeof setSalmonRunStatus === 'function') setSalmonRunStatus(true);
+        setSalmonRunStatus(true);
     } else {
         let openingTimeStr = nextEvents.length > 0 ? formatCustomDate(nextEvents[0].start, lang) : "";
-        if (typeof setSalmonRunStatus === 'function') setSalmonRunStatus(false, openingTimeStr);
+        setSalmonRunStatus(false, openingTimeStr);
     }
 
-    // ── Liste "Prochain" façon splatoon2.ink : chaque créneau = plage de dates (gauche) +
-    //    compte à rebours (droite) ; la 1ʳᵉ ligne est détaillée (vignette map + nom + armes). ──
     const nextList = document.getElementById('salmon-next-list');
     if (nextList) {
         const toShow = nextEvents.slice(0, 4);
         const sig = toShow.map(e => e.start).join('|') + '|' + lang;
-        if (nextList.dataset.sig !== sig) {   // ne reconstruit que si le set/langue change (pas de flicker)
+        if (nextList.dataset.sig !== sig) {
             nextList.dataset.sig = sig;
             nextList.innerHTML = toShow.map((ev, idx) => {
                 const dateRange = `${formatCustomDate(ev.start, lang)} – ${formatCustomDate(ev.end, lang)}`;
@@ -228,8 +258,6 @@ function updateSalmonRunDynamic() {
         let nameEl = cardContainer ? cardContainer.querySelector('.salmon-next-map-name') : null;
 
         if (nextItem && cardContainer) {
-            // Vignette de la map du créneau à venir (créée si absente du HTML), insérée en tête
-            // de ligne. Classe map-img -> ouvrable en grand au clic comme les autres.
             let thumb = cardContainer.querySelector('.salmon-next-thumb');
             if (!thumb) {
                 thumb = document.createElement('img');

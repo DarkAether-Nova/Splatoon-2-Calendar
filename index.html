@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="icon.png">
     <title>Splatoon 2 Nextendo</title>
     <style>
         @font-face {
@@ -28,7 +29,7 @@
             background-image: url('backgraund.png');
             background-repeat: repeat;
             background-size: 1080px;
-            background-attachment: fixed;
+            background-attachment: scroll;
             font-family: 'SplatfontMain', 'Splatfont2', Arial, sans-serif;
             color: var(--text-white);
             overflow-x: hidden;
@@ -50,9 +51,10 @@
             transition: opacity 0.3s ease;
         }
 
-.current-section, .next-section, .salmon-current-horizontal {
-    box-shadow: none; /* Elimina las sombras internas pesadas */
-}
+        .current-section, .next-section, .salmon-current-horizontal {
+            box-shadow: none;
+        }
+
         header {
             display: flex;
             justify-content: space-between;
@@ -64,11 +66,6 @@
             border-bottom: none;
         }
 
-
-body {
-    /* ... tus otros estilos ... */
-    background-attachment: scroll; /* Cambia 'fixed' por 'scroll' para liberar al navegador */
-}
         .header-left h1 {
             font-family: 'Splatfont2', sans-serif;
             font-size: 2.2rem;
@@ -107,10 +104,8 @@ body {
             background: rgba(0, 0, 0, 0.6);
         }
 
-        /* Ancien <select> natif MASQUÉ : gardé comme source de vérité pour changeLanguage/getLang. */
         #languageSelect { display: none !important; }
 
-        /* --- Sélecteur de langue CUSTOM (menu stylé, sans le surlignage bleu de l'OS) --- */
         .lang-selector { position: relative; }
         .lang-btn {
             display: flex; align-items: center; gap: 8px;
@@ -160,8 +155,6 @@ body {
             text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
         }
 
-        /* En-têtes en GRAS (BlitzBold) : titres de mode, Salmon Run, badges Prochain/Actuel.
-           Tout le reste hérite de SplatfontMain (régulier), comme splatoon2.ink. */
         .card-header-title,
         #txt-salmon-title,
         .proximo-tag,
@@ -214,7 +207,7 @@ body {
         .card-salmon { 
             background: repeating-linear-gradient( 45deg, #ff7a1f, #ff7a1f 22px, #e06612 22px, #e06612 44px );
             width: 560px;
-            flex: 0 0 auto; /* colonne flex : ne PAS imposer de hauteur (sinon overflow:hidden rogne "Prochain"). */
+            flex: 0 0 auto;
             max-width: 100%;
             margin: 0 auto;
             transform: rotate(0.3deg);
@@ -307,7 +300,6 @@ body {
             border-radius: 8px;
         }
 
-        /* Nom de map : style splatoon2.ink (.stage-title) — label bottom-right discret. */
         .map-name {
             position: absolute;
             bottom: 3px;
@@ -326,32 +318,34 @@ body {
             text-overflow: ellipsis;
         }
 
+        .map-img:not([src]), 
+        .map-img[src=""],
+        .salmon-current-map-img:not([src]), 
+        .salmon-current-map-img[src=""],
+        .sr-next-map:not([src]),
+        .sr-next-map[src=""],
+        .weapon-item img:not([src]),
+        .weapon-item img[src=""] {
+            opacity: 0;
+        }
 
-/* Hace que las imágenes de los mapas sean invisibles si no tienen un src asignado o está vacío */
-.map-img:not([src]), 
-.map-img[src=""],
-.salmon-current-map-img:not([src]), 
-.salmon-current-map-img[src=""],
-.sr-next-map:not([src]),
-.sr-next-map[src=""],
-.weapon-item img:not([src]),
-.weapon-item img[src=""] {
-    opacity: 0;
-}
+        .map-img, 
+        .salmon-current-map-img, 
+        .sr-next-map,
+        .weapon-item img {
+            transition: opacity 0.3s ease-in;
+        }
 
-/* Efecto de desvanecimiento suave cuando la imagen por fin carga */
-.map-img, 
-.salmon-current-map-img, 
-.sr-next-map,
-.weapon-item img {
-    transition: opacity 0.3s ease-in;
-}
         .next-section {
             background: rgba(0, 0, 0, 0.65);
             border-radius: 16px;
             padding: 14px;
             margin-bottom: 5px;
             box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            column-gap: 14px;
         }
 
         .proximo-tag {
@@ -366,6 +360,8 @@ body {
             position: relative;
             box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
             margin-bottom: 12px;
+            flex: 0 0 auto;
+            align-self: flex-start;
         }
 
         .next-content-layout {
@@ -378,9 +374,10 @@ body {
             text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
             padding: 0 2px;
             margin-bottom: 12px;
+            flex: 1 1 28%;
+            min-width: 118px;
         }
 
-        /* Bloc "Prochain" (VS) : centré comme splatoon2.ink, mais polices agrandies (place dispo). */
         .next-rule-title {
             font-size: 1.2rem;
             font-weight: bold;
@@ -397,26 +394,11 @@ body {
             font-weight: bold;
         }
 
-        /* Texte + maps CÔTE À CÔTE dans la section "next" (au lieu d'empilés -> comble le vide). */
-        .next-section {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            column-gap: 14px;
-        }
-        .next-section .proximo-tag { flex: 0 0 auto; align-self: flex-start; }
-        /* Maps "Prochain" AGRANDIES : la grille prend plus de place (grow 2) sans dépasser la
-           ligne (bases <100%), et les maps restent en 16:9. */
-        .next-section .next-content-layout { flex: 1 1 28%; min-width: 118px; margin-bottom: 0; }
         .next-section .current-maps-grid { flex: 3 1 66%; min-width: 320px; }
         .next-section .btn-upcoming { flex: 0 0 auto; margin: 10px auto 0; }
-        /* Saut de ligne forcé : garde la banderole "Prochain" seule sur sa ligne (à gauche). */
         .nx-break { flex: 0 0 100%; height: 0; }
-        /* Le Salmon Run réutilise .next-section : ne PAS lui appliquer la mise en page flex des
-           cartes VS (sinon sa liste "Suivant" se replie et disparaît). On garde un flux bloc. */
         .card-salmon .next-section { display: block; }
 
-        /* Footer façon Nextendo (disclaimer + crédit + liens). */
         .nx-footer {
             max-width: 1920px;
             margin: 6px auto 34px;
@@ -439,7 +421,6 @@ body {
         .nx-footer a:hover { text-decoration: underline; }
         .nx-footer-links span { opacity: 0.4; }
 
-        /* Liste "Prochain" du Salmon Run, disposée comme splatoon2.ink. */
         .salmon-next-list { display: flex; flex-direction: column; gap: 8px; }
         .sr-next-row {
             background: rgba(0,0,0,0.4);
@@ -489,17 +470,6 @@ body {
             margin: 12px 0 16px 0;
         }
 
-        .status-badge {
-            background-color: #333;
-            color: white;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            border: 2px solid rgba(0,0,0,0.5);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        }
-        .status-badge.open { background-color: #28b843; }
-
         .salmon-current-horizontal {
             display: flex;
             align-items: center;
@@ -543,7 +513,6 @@ body {
             margin-top: 4px;
         }
 
-        /* Iconos de armas con tamaño aumentado a 60px */
         .weapon-item {
             flex: 1 1 0;
             min-width: 0;
@@ -563,32 +532,6 @@ body {
             height: 100%;
             object-fit: contain;
             filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.8));
-        }
-
-        .salmon-next-row-clean {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 10px;
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            font-size: 0.9rem;
-            gap: 10px;
-        }
-
-        .salmon-next-time-text {
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
-            font-weight: bold;
-            flex-grow: 1;
-        }
-
-        .salmon-next-cd-text {
-            color: #ffea00;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
-            white-space: nowrap;
         }
 
         .modal {
@@ -664,7 +607,6 @@ body {
             .splat-card { width: 100%; max-width: 660px; transform: none !important; }
         }
 
-        /* --- Barre de scroll custom (modale) — couleur pilotée par le mode (--sb) --- */
         #modalScrollContainer::-webkit-scrollbar,
         #modalListContainer::-webkit-scrollbar { width: 14px; }
         #modalScrollContainer::-webkit-scrollbar-track,
@@ -682,11 +624,9 @@ body {
             scrollbar-width: thin; scrollbar-color: var(--sb-ff, #ff3d7f) rgba(0,0,0,0.45);
         }
 
-        /* --- Maps cliquables --- */
         .map-img { cursor: zoom-in; transition: transform .15s ease, filter .15s ease; }
         .map-img:hover { transform: scale(1.02); filter: brightness(1.08); }
 
-        /* --- Lightbox (image en grand, taille UNIFORME + inclinaison au clic) --- */
         #imgLightbox {
             display: none; position: fixed; inset: 0;
             background: rgba(0,0,0,0.88); z-index: 9999;
@@ -712,7 +652,6 @@ body {
 
     <div id="page-loader">Cargando rotaciones...</div>
     <script>
-        // Traduit le texte du loader AVANT le premier rendu (pas de flash espagnol).
         (function () {
             var L = {
                 es: "Cargando rotaciones...",
@@ -740,7 +679,6 @@ body {
         <div class="header-right">
             <div class="nav-buttons-container">
                 <a href="papeles online.html" class="nav-btn" id="nav-moreinfo">Salas disponibles</a>
-                <a href="splatfest.html" class="nav-btn" id="nav-splatfest">Splatfest</a>
             </div>
             <div class="lang-selector" id="langSelector">
                 <select id="languageSelect" onchange="changeLanguage()" aria-hidden="true" tabindex="-1">
@@ -920,7 +858,7 @@ body {
 
         </div>
 
-        <!-- SALMON RUN (DISEÑO LIMPIO HORIZONTAL) -->
+        <!-- SALMON RUN -->
         <div class="splat-card card-salmon">
             <div class="hanger-hole"></div>
 
@@ -939,7 +877,8 @@ body {
                     <span id="salmon-restante" style="font-size: 1.1rem; color: #ffea00; flex-basis: 100%; margin-top: 2px;">3h 55m 58s restante</span>
                 </div>
 
-                <div class="salmon-current-horizontal">
+                <!-- VISTA CUANDO ESTÁ ABIERTO -->
+                <div class="salmon-current-horizontal" id="salmon-open-view">
                     <div class="salmon-current-map-container">
                         <img id="salmon-map-img" src="" class="salmon-current-map-img map-img" alt="Mapa Salmon Run" onclick="openLightbox(this.src, document.getElementById('salmon-map-name').innerText)">
                         <p id="salmon-map-name" class="map-name">Bahía Deriva</p>
@@ -954,9 +893,14 @@ body {
                         </div>
                     </div>
                 </div>
+
+<!-- VISTA CUANDO ESTÁ CERRADO -->
+<div id="salmon-closed-view" style="display: none; text-align: center; justify-content: center; align-items: center; margin: 10px 0 15px 0; width: 100%;">
+    <img src="cerradito.png" alt="Cerrado" style="display: block; margin: 0 auto; max-width: 100%; width: 240px; height: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));">
+</div>
             </div>
 
-            <!-- SECTION "PROCHAIN" façon splatoon2.ink (générée par salmon_rotations.js). -->
+            <!-- SECTION "PROCHAIN" -->
             <div class="next-section" style="margin-bottom: 10px;">
                 <span class="proximo-tag" id="txt-salmon-next">Siguiente</span>
                 <div id="salmon-next-list" class="salmon-next-list"></div>
@@ -965,7 +909,6 @@ body {
 
     </div>
 
-    <!-- FOOTER façon Nextendo -->
     <footer class="nx-footer">
         <p class="nx-footer-disc">
             Ce site n'est pas affilié à Nintendo. Tous les noms de produits, logos et marques
@@ -987,7 +930,6 @@ body {
         </nav>
     </footer>
 
-    <!-- MODAL -->
     <div class="modal" id="upcomingModal">
         <div class="modal-content" id="modalScrollContainer">
             <h3 id="modal-upcoming-title">Próximas Rotaciones</h3>
@@ -996,11 +938,8 @@ body {
         </div>
     </div>
 
-    <!-- SCRIPTS -->
     <script src="combates.js"></script>
     <script src="salmon_rotations.js"></script>
-    <!-- salmon.js retiré : doublon de salmon_rotations.js (re-déclaration de salmonRotations -> SyntaxError). À consolider en un seul fichier. -->
-
     
     <script>
         window.addEventListener('load', () => {
@@ -1045,8 +984,6 @@ body {
     </script>
 
     <script>
-        // Menu de langue custom : ouverture/fermeture + sélection. Le <select> caché reste la
-        // source de vérité (changeLanguage/getLang lisent sa .value ; changeLanguage sync le bouton).
         (function () {
             var wrap = document.getElementById('langSelector');
             var sel = document.getElementById('languageSelect');
@@ -1071,7 +1008,6 @@ body {
         })();
     </script>
 
-    <!-- LIGHTBOX : image en grand au clic sur une map -->
     <div id="imgLightbox" onclick="closeImgLightbox()">
         <img id="imgLightboxImg" src="" alt="">
         <div id="imgLightboxCap"></div>

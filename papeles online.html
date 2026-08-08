@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="icon.png">
     <title>Splatoon 2 Nextendo</title>
     <style>
         @font-face {
@@ -257,16 +258,14 @@
             border-bottom: 2px dashed #ddd;
         }
 
-/* Hace que la imagen sea invisible si no tiene un src asignado o está vacío */
-.paper-map-img:not([src]), 
-.paper-map-img[src=""] {
-    opacity: 0;
-}
+        .paper-map-img:not([src]), 
+        .paper-map-img[src=""] {
+            opacity: 0;
+        }
 
-/* Opcional: añade un pequeño efecto de desvanecimiento cuando la imagen por fin carga */
-.paper-map-img {
-    transition: opacity 0.3s ease-in;
-}
+        .paper-map-img {
+            transition: opacity 0.3s ease-in;
+        }
 
         .paper-title {
             font-family: 'Splatfont2', sans-serif;
@@ -386,11 +385,10 @@
             transition: background 0.2s;
         }
 
-.tear-strip.disconnected {
+        .tear-strip.disconnected {
             background: transparent;
             border-top: none;
             border-bottom: none;
-            /* Mantiene solo la línea divisoria derecha para que no se descuadre */
             border-left: none;
             border-right: 1px dashed #ccc; 
         }
@@ -555,7 +553,7 @@
                 ranked: "Competitivo",
                 league: "Liga",
                 salmonOpen: "Abierto",
-                footerDisc: "Este sitio no está afiliado a Nintendo. Todos los nombres de productos, logotipos y marcas pertenecen a sus respectivos dueños.",
+                footerDisc: "Este sitio no está afiliado à Nintendo. Todos los nombres de productos, logotipos y marcas pertenecen a sus respectivos dueños.",
                 footerCredit: "Calendario original por",
                 footerHosted: "alojado por"
             },
@@ -632,7 +630,6 @@
         <div class="header-right">
             <div class="nav-buttons-container">
                 <a href="index.html" class="nav-btn" id="nav-moreinfo">Rotacion de mapas</a>
-                <a href="splatfest.html" class="nav-btn" id="nav-splatfest">Splatfest</a>
             </div>
             <div class="lang-selector" id="langSelector">
                 <select id="languageSelect" onchange="changeLanguage()" aria-hidden="true" tabindex="-1">
@@ -809,38 +806,12 @@
             }
         });
 
-        function getFormattedCurrentTime() {
-            let savedTime = localStorage.getItem('nextendo_timer_val');
-            let savedTimestamp = localStorage.getItem('nextendo_timestamp');
-            let now = Date.now();
-            let currentSeconds = 180;
-
-            if (savedTime && savedTimestamp) {
-                let elapsedSeconds = Math.floor((now - parseInt(savedTimestamp)) / 1000);
-                currentSeconds = parseInt(savedTime) - elapsedSeconds;
-
-                if (currentSeconds <= 0) {
-                    let totalSecondsPassed = elapsedSeconds;
-                    currentSeconds = 180 - (totalSecondsPassed % 180);
-                    refreshAllPlayers(true);
-                }
-            } else {
-                localStorage.setItem('nextendo_timestamp', now);
-                localStorage.setItem('nextendo_timer_val', 180);
-            }
-
-            let m = Math.floor(currentSeconds / 60);
-            let s = currentSeconds % 60;
-            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-        }
-
         function buildSheetsStructure() {
             const container = document.getElementById('papersGridContainer');
             if (!container) return;
             
             let lang = getCurrentLang();
             let t = pageTranslations[lang] || pageTranslations.es;
-            let initialTimeStr = getFormattedCurrentTime();
             let html = '';
 
             // Amistoso
@@ -858,7 +829,7 @@
                             <div class="paper-map-box"><img id="f${i}-map2" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="f${i}-name2" class="paper-map-name">-</p></div>
                         </div>
                         <div class="paper-info-row">
-                            <span class="match-timer" id="f${i}-timer">${initialTimeStr}</span>
+                            <span class="match-timer" id="f${i}-timer">${formatRoomTimer(getRoomTimer(`f${i}`))}</span>
                         </div>
                     </div>
                     <div class="tear-off-section">
@@ -883,7 +854,7 @@
                             <div class="paper-map-box"><img id="r${i}-map2" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="r${i}-name2" class="paper-map-name">-</p></div>
                         </div>
                         <div class="paper-info-row">
-                            <span class="match-timer" id="r${i}-timer">${initialTimeStr}</span>
+                            <span class="match-timer" id="r${i}-timer">${formatRoomTimer(getRoomTimer(`r${i}`))}</span>
                         </div>
                     </div>
                     <div class="tear-off-section">
@@ -908,7 +879,7 @@
                             <div class="paper-map-box"><img id="l${i}-map2" src="" class="paper-map-img" onclick="openImgLightbox(this.src, this.nextElementSibling.textContent)" alt=""><p id="l${i}-name2" class="paper-map-name">-</p></div>
                         </div>
                         <div class="paper-info-row">
-                            <span class="match-timer" id="l${i}-timer">${initialTimeStr}</span>
+                            <span class="match-timer" id="l${i}-timer">${formatRoomTimer(getRoomTimer(`l${i}`))}</span>
                         </div>
                     </div>
                     <div class="tear-off-section">
@@ -933,7 +904,7 @@
                             <p id="s${i}-map-name" class="paper-map-name">-</p>
                         </div>
                         <div class="paper-info-row" style="font-size: 0.85rem; justify-content: flex-end;">
-                            <span class="match-timer" id="s${i}-timer">${initialTimeStr}</span>
+                            <span class="match-timer" id="s${i}-timer">${formatRoomTimer(getRoomTimer(`s${i}`))}</span>
                         </div>
                         <div class="salmon-weapons-grid">
                             <img id="s${i}-w1" src="" class="salmon-sheet-wep" alt="W1">
@@ -1005,13 +976,13 @@
 
                 let statusS = document.getElementById(`s${i}-status`);
                 if(statusS) statusS.textContent = t.salmonOpen;
-let friendlyRule = document.getElementById(`friendly-${i}-rule`);
-let rankedRule = document.getElementById(`ranked-${i}-rule`);
-let leagueRule = document.getElementById(`league-${i}-rule`);
+                let friendlyRule = document.getElementById(`friendly-${i}-rule`);
+                let rankedRule = document.getElementById(`ranked-${i}-rule`);
+                let leagueRule = document.getElementById(`league-${i}-rule`);
 
-if (friendlyRule) friendlyRule.textContent = t.friendly;
-if (rankedRule) rankedRule.textContent = t.ranked;
-if (leagueRule) leagueRule.textContent = t.league;
+                if (friendlyRule) friendlyRule.textContent = t.friendly;
+                if (rankedRule) rankedRule.textContent = t.ranked;
+                if (leagueRule) leagueRule.textContent = t.league;
             }
         }
 
@@ -1044,33 +1015,44 @@ if (leagueRule) leagueRule.textContent = t.league;
                 }
             });
 
-            const sMapImg = document.getElementById('salmon-map-img')?.src;
-            const sMapName = document.getElementById('salmon-map-name')?.textContent;
-            const sw1 = document.getElementById('salmon-w1')?.src;
-            const sw2 = document.getElementById('salmon-w2')?.src;
-            const sw3 = document.getElementById('salmon-w3')?.src;
-            const sw4 = document.getElementById('salmon-w4')?.src;
+            const salmonStatusText = document.getElementById('txt-salmon-current')?.textContent.trim() || "";
+            const sMapImg = document.getElementById('salmon-map-img')?.src || "";
+            
+            const isSalmonClosed = salmonStatusText.includes('Cerrado') || 
+                                   salmonStatusText.includes('Closed') || 
+                                   salmonStatusText.includes('Fermé') || 
+                                   salmonStatusText.includes('Fechado') ||
+                                   sMapImg === "";
 
             for (let i = 1; i <= 4; i++) {
-                const targetImg = document.getElementById(`s${i}-map-img`);
-                const targetName = document.getElementById(`s${i}-map-name`);
-                
-                if (targetImg && sMapImg) targetImg.src = sMapImg;
-                if (targetName && sMapName) targetName.textContent = sMapName;
+                const sheetCard = document.getElementById(`sheet-s${i}`);
 
-                if (sw1) {
-                    const w1 = document.getElementById(`s${i}-w1`);
-                    const w2 = document.getElementById(`s${i}-w2`);
-                    const w3 = document.getElementById(`s${i}-w3`);
-                    const w4 = document.getElementById(`s${i}-w4`);
-                    if (w1) w1.src = sw1;
-                    if (w2) w2.src = sw2;
-                    if (w3) w3.src = sw3;
-                    if (w4) w4.src = sw4;
+                if (isSalmonClosed) {
+                    if (sheetCard) sheetCard.style.display = 'none';
+                } else {
+                    if (sheetCard) sheetCard.style.display = 'flex';
+
+                    const targetImg = document.getElementById(`s${i}-map-img`);
+                    const targetName = document.getElementById(`s${i}-map-name`);
+                    const sMapName = document.getElementById('salmon-map-name')?.textContent;
+                    
+                    if (targetImg && sMapImg) targetImg.src = sMapImg;
+                    if (targetName && sMapName) targetName.textContent = sMapName;
+
+                    const sw1 = document.getElementById('salmon-w1')?.src;
+                    if (sw1) {
+                        const w1 = document.getElementById(`s${i}-w1`);
+                        const w2 = document.getElementById(`s${i}-w2`);
+                        const w3 = document.getElementById(`s${i}-w3`);
+                        const w4 = document.getElementById(`s${i}-w4`);
+                        if (w1) w1.src = sw1;
+                        if (w2) w2.src = document.getElementById('salmon-w2')?.src;
+                        if (w3) w3.src = document.getElementById('salmon-w3')?.src;
+                        if (w4) w4.src = document.getElementById('salmon-w4')?.src;
+                    }
                 }
             }
         }
-
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof loadRotations === 'function') loadRotations();
             if (typeof loadSalmonRotations === 'function') loadSalmonRotations();
@@ -1081,84 +1063,132 @@ if (leagueRule) leagueRule.textContent = t.league;
             }, 100);
         });
 
-        let matchSeconds = getPersistentSeconds();
+        // NUEVO SISTEMA DE TEMPORIZADORES INDEPENDIENTES POR SALA
+        const ROOM_TIMER_KEYS = [
+            'f1', 'f2', 'f3', 'f4',
+            'r1', 'r2', 'r3', 'r4',
+            'l1', 'l2', 'l3', 'l4',
+            's1', 's2', 's3', 's4'
+        ];
 
-        function getPersistentSeconds() {
-            let savedTime = localStorage.getItem('nextendo_timer_val');
-            let savedTimestamp = localStorage.getItem('nextendo_timestamp');
-            let now = Date.now();
-            let currentSeconds = 180;
+        function getRoomTimer(roomId) {
+            const key = `nextendo_room_timer_${roomId}`;
+            const timestampKey = `nextendo_room_timestamp_${roomId}`;
 
-            if (savedTime && savedTimestamp) {
-                let elapsedSeconds = Math.floor((now - parseInt(savedTimestamp)) / 1000);
-                currentSeconds = parseInt(savedTime) - elapsedSeconds;
-                if (currentSeconds <= 0) {
-                    currentSeconds = 180 - (elapsedSeconds % 180);
-                    refreshAllPlayers(true);
+            let savedTime = localStorage.getItem(key);
+            let savedTimestamp = localStorage.getItem(timestampKey);
+
+            const now = Date.now();
+
+            if (savedTime !== null && savedTimestamp !== null) {
+                const elapsed = Math.floor(
+                    (now - parseInt(savedTimestamp, 10)) / 1000
+                );
+
+                let seconds = parseInt(savedTime, 10) - elapsed;
+
+                if (seconds > 0) {
+                    return seconds;
                 }
-            } else {
-                localStorage.setItem('nextendo_timestamp', now);
-                localStorage.setItem('nextendo_timer_val', 180);
+
+                // Cuando llega a 0, empieza otra partida con una duración aleatoria.
+                seconds = Math.floor(Math.random() * 166) + 15;
+
+                localStorage.setItem(key, seconds);
+                localStorage.setItem(timestampKey, now);
+                refreshAllPlayers(true); // Refrescar jugadores al terminar partida
+
+                return seconds;
             }
-            return currentSeconds;
+
+            // Primera vez que aparece esta sala: tiempo aleatorio entre 15 segundos y 3 minutos.
+            const initialSeconds = Math.floor(Math.random() * 166) + 15;
+
+            localStorage.setItem(key, initialSeconds);
+            localStorage.setItem(timestampKey, now);
+
+            return initialSeconds;
         }
 
-        setInterval(() => {
-            matchSeconds--;
-            if (matchSeconds < 0) {
-                matchSeconds = 180;
-                refreshAllPlayers(true);
-            }
+        function formatRoomTimer(seconds) {
+            seconds = Math.max(0, seconds);
 
-            localStorage.setItem('nextendo_timer_val', matchSeconds);
-            localStorage.setItem('nextendo_timestamp', Date.now());
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
 
-            let m = Math.floor(matchSeconds / 60);
-            let s = matchSeconds % 60;
-            let timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
 
-            for (let mode of ['f', 'r', 'l']) {
-                for (let i = 1; i <= 4; i++) {
-                    let timerEl = document.getElementById(`${mode}${i}-timer`);
-                    if (timerEl) timerEl.textContent = timeStr;
+        function updateAllRoomTimers() {
+            ROOM_TIMER_KEYS.forEach(roomId => {
+                const timerEl = document.getElementById(`${roomId}-timer`);
+                if (!timerEl) return;
+
+                const key = `nextendo_room_timer_${roomId}`;
+                const timestampKey = `nextendo_room_timestamp_${roomId}`;
+
+                let savedTime = localStorage.getItem(key);
+                let savedTimestamp = localStorage.getItem(timestampKey);
+
+                if (savedTime === null || savedTimestamp === null) {
+                    const seconds = getRoomTimer(roomId);
+                    timerEl.textContent = formatRoomTimer(seconds);
+                    return;
                 }
+
+                const elapsed = Math.floor(
+                    (Date.now() - parseInt(savedTimestamp, 10)) / 1000
+                );
+
+                let seconds = parseInt(savedTime, 10) - elapsed;
+
+                if (seconds <= 0) {
+                    // Nueva partida con duración aleatoria.
+                    seconds = Math.floor(Math.random() * 166) + 15;
+
+                    localStorage.setItem(key, seconds);
+                    localStorage.setItem(timestampKey, Date.now());
+                    refreshAllPlayers(true);
+                }
+
+                timerEl.textContent = formatRoomTimer(seconds);
+            });
+        }
+
+        // Actualizar inmediatamente y cada segundo
+        updateAllRoomTimers();
+        setInterval(updateAllRoomTimers, 1000);
+
+        function changeLanguage() {
+            var sel = document.getElementById('languageSelect');
+            if (!sel) return;
+
+            var lang = sel.value;
+            localStorage.setItem('nextendo_lang', lang);
+            
+            var label = document.getElementById('langBtnLabel');
+            if (label) {
+                var opt = sel.options[sel.selectedIndex];
+                if (opt) label.textContent = opt.text;
             }
-            for (let i = 1; i <= 4; i++) {
-                let timerEl = document.getElementById(`s${i}-timer`);
-                if (timerEl) timerEl.textContent = timeStr;
+
+            var menu = document.getElementById('langMenu');
+            if (menu) {
+                menu.querySelectorAll('li').forEach(function(li){
+                    if (li.dataset.lang === lang) li.setAttribute('aria-selected', 'true');
+                    else li.removeAttribute('aria-selected');
+                });
             }
-        }, 1000);
 
-function changeLanguage() {
-    var sel = document.getElementById('languageSelect');
-    if (!sel) return;
+            updateStaticTexts();
 
-    var lang = sel.value;
-    localStorage.setItem('nextendo_lang', lang);
-    
-    var label = document.getElementById('langBtnLabel');
-    if (label) {
-        var opt = sel.options[sel.selectedIndex];
-        if (opt) label.textContent = opt.text;
-    }
+            if (typeof loadRotations === 'function') loadRotations();
+            if (typeof loadSalmonRotations === 'function') loadSalmonRotations();
 
-    var menu = document.getElementById('langMenu');
-    if (menu) {
-        menu.querySelectorAll('li').forEach(function(li){
-            if (li.dataset.lang === lang) li.setAttribute('aria-selected', 'true');
-            else li.removeAttribute('aria-selected');
-        });
-    }
-
-    updateStaticTexts();
-
-    if (typeof loadRotations === 'function') loadRotations();
-    if (typeof loadSalmonRotations === 'function') loadSalmonRotations();
-
-    setTimeout(() => {
-        updateStaticTexts();
-    }, 100);
-}
+            setTimeout(() => {
+                updateStaticTexts();
+            }, 100);
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             var savedLang = getCurrentLang();
