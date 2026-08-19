@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="icon.png">
+    <title>Splatoon 2 Nextendo</title>
+    <style>
+        @font-face {
+            font-family: 'Splatfont2';
+            src: url('BlitzBold.otf') format('opentype');
+        }
+        /* Version RÉGULIÈRE de la police Splatoon 2 (le rendu de splatoon2.ink) : texte courant. */
+        @font-face {
+            font-family: 'SplatfontMain';
+            src: url('Splatfont2.ttf') format('truetype');
+        }
+
+        :root {
+            --bg-dark: #222222;
+            --text-white: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            background-image: url('backgraund.png');
+            background-repeat: repeat;
+            background-size: 1080px;
+            background-attachment: scroll;
+            font-family: 'SplatfontMain', 'Splatfont2', Arial, sans-serif;
+            color: var(--text-white);
+            overflow-x: hidden;
+        }
+
+        #page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #222222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: #fff;
+            font-size: 1.5rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .current-section, .next-section, .salmon-current-horizontal {
+            box-shadow: none;
+        }
+
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: transparent;
+            border-bottom: none;
+        }
+
+        .header-left h1 {
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 2.2rem;
+            margin: 0;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.8);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn, .lang-selector select {
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover, .lang-selector select:hover {
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        #languageSelect { display: none !important; }
+
+        .lang-selector { position: relative; }
+        .lang-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.2);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+        }
+        .lang-btn:hover { background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.4); }
+        .lang-btn-globe { font-size: 1rem; line-height: 1; }
+        .lang-btn-label { min-width: 68px; text-align: left; }
+        .lang-btn-caret { font-size: 0.75rem; opacity: .8; transition: transform .2s; }
+        .lang-selector.open .lang-btn { border-color: #ff7a1f; background: rgba(0,0,0,0.6); }
+        .lang-selector.open .lang-btn-caret { transform: rotate(180deg); }
+        .lang-menu {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            min-width: 100%; margin: 0; padding: 6px;
+            list-style: none;
+            background: #191a2c;
+            border: 2px solid rgba(255,255,255,0.14);
+            border-radius: 14px;
+            box-shadow: 0 14px 34px rgba(0,0,0,0.6);
+            opacity: 0; visibility: hidden; transform: translateY(-6px);
+            transition: opacity .15s ease, transform .15s ease, visibility .15s;
+            z-index: 1000;
+        }
+        .lang-selector.open .lang-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .lang-menu li {
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.95rem;
+            color: #cfd3e6;
+            padding: 9px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .12s, color .12s;
+        }
+        .lang-menu li:hover { background: rgba(255,122,31,0.18); color: #fff; }
+        .lang-menu li[aria-selected="true"] {
+            background: linear-gradient(90deg, #ff7a1f, #ff5c9a);
+            color: #fff;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+        }
+
+        .card-header-title,
+        #txt-salmon-title,
+        .proximo-tag,
+        .status-badge {
+            font-family: 'Splatfont2', Arial, sans-serif;
+        }
+
+        .main-container {
+            max-width: 1920px;
+            margin: 20px auto 40px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .cards-grid {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .splat-card {
+            flex: 1 1 460px;
+            max-width: 760px;
+            border-radius: 22px;
+            padding: 14px 16px;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+            box-sizing: border-box;
+            border: 2px solid rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .card-green { 
+            background: repeating-linear-gradient(45deg, #10db10, #10db10 18px, #0bb80b 18px, #0bb80b 36px);
+            transform: rotate(-1.2deg);
+        }
+        .card-orange { 
+            background: repeating-linear-gradient(45deg, #ff6000, #ff6000 18px, #e85500 18px, #e85500 36px);
+            transform: rotate(0.8deg);
+            margin-top: 10px;
+        }
+        .card-pink {
+            background: repeating-linear-gradient(45deg, #ff1a75, #ff1a75 18px, #e6005c 18px, #e6005c 36px);
+            transform: rotate(-0.6deg);
+        }
+        
+        .card-salmon { 
+            background: repeating-linear-gradient(45deg, #ff7a1f, #ff7a1f 18px, #e06612 18px, #e06612 36px);
+            width: 560px;
+            flex: 0 0 auto;
+            max-width: 100%;
+            margin: 0 auto;
+            transform: rotate(0.3deg);
+            padding: 20px 25px;
+        }
+
+        .hanger-hole {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 10px;
+            background-color: var(--bg-dark);
+            border-radius: 22px;
+            z-index: 111;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.8);
+        }
+        .hanger-hole::before {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 6px;
+            background-color: var(--bg-dark);
+            border-radius: 12px 12px 0 0;
+            box-shadow: inset 0 3px 3px rgba(0,0,0,0.8);
+        }
+
+        .card-header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 2.35rem;
+            margin: 16px 0 10px 0;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+            padding: 0 4px;
+            white-space: nowrap;
+        }
+
+        .mode-icon {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.4));
+        }
+
+        .current-section {
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+@media (max-width: 768px) {
+            header {
+                padding: 10px 14px;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+@media (max-width: 768px) {
+    /* Separa la tarjeta de Salmon Run de la de Combate de liga que tiene arriba */
+    .card-salmon {
+        margin-top: 35px !important;
+    }
+
+    /* Opcional: Asegura espacio entre las demás tarjetas apiladas */
+    .cards-grid {
+        gap: 35px !important;
+        margin-bottom: 23px;
+    }
+}
+            .header-left h1 {
+                font-size: 1.3rem;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: center;
+                margin-top: 6px;
+            }
+
+            .main-container {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                padding: 0 8px !important;
+                gap: 12px !important;
+                margin: 8px auto 20px auto !important;
+            }
+
+            .splat-card {
+                padding: 10px 10px 14px 10px !important;
+                flex: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                transform: none !important;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
+            }
+
+            .card-salmon {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 12px 10px 14px 10px !important;
+            }
+
+.card-header-title {
+                font-size: 1.25rem;
+                margin: 18px 0 8px 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+                text-align: center !important;
+                width: 100% !important;
+                
+                /* Agrega esto para moverlo un poco hacia la izquierda */
+                position: relative !important;
+                left: -10px !important; /* Cambia este valor a -8px o -15px según lo veas más centrado */
+            }
+
+            .mode-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .current-section, .next-section {
+                padding: 8px;
+                margin-bottom: 8px;
+            }
+
+            .current-maps-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+            }
+
+            .next-section {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .next-section .current-maps-grid {
+                width: 100%;
+                min-width: 0;
+                display: grid;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+            }
+
+            .next-content-layout {
+                flex: none;
+                width: 100%;
+                margin-bottom: 6px;
+            }
+
+            /* Movemos la etiqueta "Próximo" un poco más a la derecha */
+            .proximo-tag {
+                margin-left: -32px !important;
+                align-self: flex-start;
+                border-radius: 12px;
+                font-size: 0.9rem;
+                padding: 3px 10px;
+                margin-bottom: 6px;
+            }
+
+            .salmon-current-horizontal {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .salmon-current-map-container {
+                width: 100%;
+                min-width: 100%;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 12px;
+                max-height: 90vh;
+            }
+
+            #modalListContainer img {
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 16/9;
+            }
+        }
+        .current-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            font-weight: bold;
+        }
+
+        .current-maps-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .map-box {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            box-shadow: 0 11px 13px rgba(0,0,0,0.4);
+            background: #000;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .map-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .map-name {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #dbdbdb;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin: 0;
+            text-shadow: 1px 1px 0 #000;
+            white-space: nowrap;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .map-img:not([src]), 
+        .map-img[src=""],
+        .salmon-current-map-img:not([src]), 
+        .salmon-current-map-img[src=""],
+        .sr-next-map:not([src]),
+        .sr-next-map[src=""],
+        .weapon-item img:not([src]),
+        .weapon-item img[src=""] {
+            opacity: 0;
+        }
+
+        .map-img, 
+        .salmon-current-map-img, 
+        .sr-next-map,
+        .weapon-item img {
+            transition: opacity 0.3s ease-in;
+        }
+
+        .next-section {
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 5px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            column-gap: 14px;
+        }
+
+        .proximo-tag {
+            background: repeating-linear-gradient(45deg, #6a11e8, #6a11e8 10px, #5a0dc4 10px, #5a0dc4 20px);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 0 14px 14px 0;
+            display: inline-block;
+            font-size: 1.15rem;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
+            margin-left: -40px;
+            position: relative;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+            margin-bottom: 12px;
+            flex: 0 0 auto;
+            align-self: flex-start;
+        }
+
+        .next-content-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            align-items: center;
+            text-align: center;
+            line-height: 1.15;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+            padding: 0 2px;
+            margin-bottom: 12px;
+            flex: 1 1 28%;
+            min-width: 118px;
+        }
+
+        .next-rule-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .next-timer-hours {
+            font-size: 1.05rem;
+            color: #ffea00;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+        }
+
+        .next-time-range {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .next-section .current-maps-grid { flex: 3 1 66%; min-width: 320px; }
+        .next-section .btn-upcoming { flex: 0 0 auto; margin: 10px auto 0; }
+        .nx-break { flex: 0 0 100%; height: 0; }
+        .card-salmon .next-section { display: block; }
+
+/* 1. Estructura general para fijar el flujo de la página */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-container {
+    flex: 1 0 auto; /* Esto evita que el footer suba de golpe si una tarjeta es más corta */
+}
+
+/* 2. El footer con su raya, centrado y márgenes correctos */
+.nx-footer {
+    flex-shrink: 0;
+    max-width: 1700px;
+    width: 100%;
+    margin: 40px auto 30px auto; /* <- Cambiado de 20px a 60px para separarlo del borde inferior */
+    padding: 22px 24px 6px;
+    border-top: 2px solid rgba(255, 255, 255, 0.12);
+    text-align: center;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.55; /* <- Restaurado para que el texto respire bien y no se amontone */
+    box-sizing: border-box;
+}
+        .nx-footer-disc { max-width: 820px; margin: 0 auto 10px; font-size: 0.82rem; }
+        .nx-footer-credit { margin: 6px 0; font-size: 0.95rem; }
+        .nx-footer-credit strong { color: #fff; }
+        .nx-footer-links {
+            margin-top: 10px;
+            display: flex; gap: 12px;
+            justify-content: center; align-items: center;
+            flex-wrap: wrap; font-weight: bold; font-size: 1rem;
+        }
+        .nx-footer a { color: #ff7a1f; text-decoration: none; }
+        .nx-footer a:hover { text-decoration: underline; }
+        .nx-footer-links span { opacity: 0.4; }
+
+        .btn-upcoming {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 10px 24px;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin: 20px auto 5px auto;
+            cursor: pointer;
+            width: fit-content;
+            transition: background 0.2s;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .btn-upcoming:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .salmon-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+            margin: 12px 0 16px 0;
+        }
+
+@media (max-width: 768px) {
+    /* Ajuste para que la lista en móvil apile la info arriba y las imágenes abajo */
+    .modal-rotation-item {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    
+    .modal-info-side {
+        flex: none !important;
+        text-align: left;
+    }
+}
+        .salmon-current-horizontal {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .salmon-current-map-container {
+            position: relative;
+            width: 180px;
+            min-width: 180px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            background: #000;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            aspect-ratio: 16/9;
+        }
+
+        .salmon-current-map-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .salmon-current-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+        }
+
+        .salmon-weapons-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+/* Ajustar el tamaño de las armas dentro del modal de próximos escenarios */
+.modal-content .weapon-item, 
+.upcoming-modal .weapon-item {
+    width: 45px !important;
+    height: 45px !important;
+    min-width: 45px !important;
+    min-height: 45px !important;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-content .weapon-item img, 
+.upcoming-modal .weapon-item img {
+    width: 75% !important;
+    height: 75% !important;
+    object-fit: contain !important;
+}
+
+/* Asegurar que la fila de armas dentro del modal se mantenga horizontal */
+.modal-content .salmon-weapons-row,
+.upcoming-modal .salmon-weapons-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+        .weapon-item {
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: 60px;
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .weapon-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.8));
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: #2a2a2a;
+            border: 2px solid #555;
+            padding: 30px;
+            border-radius: 20px;
+            width: 600px;
+            max-width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            text-align: center;
+            box-shadow: 0 10px 30px #000;
+            background-image: url('backgraund.png');
+            background-repeat: repeat;
+        }
+
+#salmon-next-time {
+    position: relative;
+    top: -2px; /* Sube o baja este número (ej. 2px, 4px, 6px) hasta que quede exacto */
+}
+        .modal-content h3 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .modal-rotation-block {
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.4);
+        }
+
+        #modalListContainer img {
+            width: 500px !important;
+            height: 281px !important;
+            max-width: 100% !important;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 8px auto 4px auto;
+            display: block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .close-modal {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Splatfont2', sans-serif;
+            font-size: 1.1rem;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        .close-modal:hover { background: rgba(255, 255, 255, 0.4); }
+
+        @media(max-width: 1500px) {
+            .cards-grid { flex-direction: column; align-items: center; }
+            .splat-card { width: 100%; max-width: 660px; transform: none !important; }
+        }
+
+        #modalScrollContainer::-webkit-scrollbar,
+        #modalListContainer::-webkit-scrollbar { width: 14px; }
+        #modalScrollContainer::-webkit-scrollbar-track,
+        #modalListContainer::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.45); border-radius: 10px;
+        }
+        #modalScrollContainer::-webkit-scrollbar-thumb,
+        #modalListContainer::-webkit-scrollbar-thumb {
+            background: var(--sb, linear-gradient(180deg, #ff3d7f, #7b2ff7));
+            border-radius: 10px; border: 2px solid rgba(0,0,0,0.35);
+        }
+        #modalScrollContainer::-webkit-scrollbar-thumb:hover,
+        #modalListContainer::-webkit-scrollbar-thumb:hover { filter: brightness(1.18); }
+        #modalScrollContainer, #modalListContainer {
+            scrollbar-width: thin; scrollbar-color: var(--sb-ff, #ff3d7f) rgba(0,0,0,0.45);
+        }
+
+        .map-img { cursor: zoom-in; transition: transform .15s ease, filter .15s ease; }
+        .map-img:hover { transform: scale(1.02); filter: brightness(1.08); }
+
+        #imgLightbox {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.88); z-index: 9999;
+            justify-content: center; align-items: center; flex-direction: column;
+            cursor: zoom-out; animation: lbFade .15s ease;
+        }
+        #imgLightbox.open { display: flex; }
+        #imgLightboxImg {
+            width: min(90vw, 1000px); height: auto; max-height: 80vh;
+            object-fit: contain; border-radius: 12px;
+            box-shadow: 0 14px 50px rgba(0,0,0,0.75);
+            border: 3px solid rgba(255,255,255,0.15);
+            transition: transform .2s ease;
+        }
+        #imgLightboxCap {
+            margin-top: 20px; font-family: 'Splatfont2', sans-serif;
+            color: #fff; font-size: 1.6rem; text-shadow: 0 2px 6px rgba(0,0,0,0.85);
+        }
+        @keyframes lbFade { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="page-loader">Cargando rotaciones...</div>
+    <script>
+        (function () {
+            var L = {
+"es-MX": "Cargando rotaciones...",
+                "es-ES": "Cargando rotaciones...",
+                en: "Loading rotations...",
+                fr: "Chargement des rotations...",
+                pt: "Carregando rotações...",
+                it: "Caricamento rotazioni...",
+                de: "Rotationen werden geladen...",
+                ja: "ローテーションを読み込み中...",
+                ru: "Загрузка расписания..."
+            };
+            var lang = localStorage.getItem("nextendo_lang");
+            if (!lang) {
+                var n = (navigator.language || "es").slice(0, 2).toLowerCase();
+                lang = L[n] ? n : "es";
+            }
+            var el = document.getElementById("page-loader");
+            if (el && L[lang]) el.textContent = L[lang];
+        })();
+    </script>
+
+    <header>
+        <div class="header-left">
+            <h1 id="main-title">NEXTENDO NETWORK / SPLATOON 2</h1>
+        </div>
+        <div class="header-right">
+            <div class="nav-buttons-container">
+                <a href="papeles online.html" class="nav-btn" id="nav-moreinfo">Salas disponibles</a>
+            </div>
+<div class="lang-selector" id="langSelector">
+    <select id="languageSelect" onchange="changeLanguage()" aria-hidden="true" tabindex="-1">
+        <option value="es-MX">Español (LA)</option>
+        <option value="es-ES">Español (ES)</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="pt">Português</option>
+        <option value="ru">Русский</option>
+    </select>
+    <button type="button" class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false">
+        <span class="lang-btn-globe" aria-hidden="true">🌐</span>
+        <span class="lang-btn-label" id="langBtnLabel">Español (LA)</span>
+        <span class="lang-btn-caret" aria-hidden="true">▾</span>
+    </button>
+    <ul class="lang-menu" id="langMenu" role="listbox">
+        <li role="option" data-lang="es-MX">Español (LA)</li>
+        <li role="option" data-lang="es-ES">Español (ES)</li>
+        <li role="option" data-lang="en">English</li>
+        <li role="option" data-lang="fr">Français</li>
+        <li role="option" data-lang="pt">Português</li>
+        <li role="option" data-lang="ru">Русский</li>
+    </ul>
+</div>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <div class="cards-grid">
+
+            <!-- 1. COMBATE AMISTOSO -->
+            <div class="splat-card card-green">
+                <div class="hanger-hole"></div>
+                <div class="card-header-title">
+                    <img src="amistoso.png" class="mode-icon" alt="Amistoso">
+                    <span id="txt-turf-title"></span>
+                </div>
+
+                <div class="current-section">
+                    <div class="current-header">
+                        <span id="friendly-current-rule"></span>
+                        <span style="font-size: 0.9rem;" id="friendly-current-time"></span>
+                    </div>
+                    <div class="current-maps-grid">
+                        <div class="map-box">
+                            <img id="f-curr-map1" src="" class="map-img" alt="Mapa 1">
+                            <p id="f-curr-name1" class="map-name">-</p>
+                        </div>
+                        <div class="map-box">
+                            <img id="f-curr-map2" src="" class="map-img" alt="Mapa 2">
+                            <p id="f-curr-name2" class="map-name">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="next-section">
+                    <div class="proximo-tag" id="txt-next"></div>
+                    <div class="nx-break"></div><div class="next-content-layout">
+                        <div class="next-rule-title" id="friendly-next-rule"></div>
+                        <div class="next-timer-hours"><span id="friendly-timer"></span></div>
+                        <div class="next-time-range" id="friendly-next-time-range"></div>
+                    </div>
+                    <div class="current-maps-grid">
+                        <div class="map-box">
+                            <img id="f-next-map1" src="" class="map-img" alt="Próx Mapa 1">
+                            <p id="f-next-name1" class="map-name">-</p>
+                        </div>
+                        <div class="map-box">
+                            <img id="f-next-map2" src="" class="map-img" alt="Próx Mapa 2">
+                            <p id="f-next-name2" class="map-name">-</p>
+                        </div>
+                    </div>
+                    
+<button class="btn-upcoming" onclick="openUpcomingModal('friendly')" id="txt-btn-upcoming-1">
+</button>
+                </div>
+            </div>
+
+            <!-- 2. COMBATE COMPETITIVO -->
+            <div class="splat-card card-orange">
+                <div class="hanger-hole"></div>
+                <div class="card-header-title">
+                    <img src="competitivo.png" class="mode-icon" alt="Competitivo">
+                    <span id="txt-ranked-title"></span>
+                </div>
+
+                <div class="current-section">
+                    <div class="current-header">
+                        <span id="ranked-current-rule"></span>
+                        <span style="font-size: 0.9rem;" id="ranked-current-time"></span>
+                    </div>
+                    <div class="current-maps-grid">
+                        <div class="map-box">
+                            <img id="r-curr-map1" src="" class="map-img" alt="Mapa 1">
+                            <p id="r-curr-name1" class="map-name">-</p>
+                        </div>
+                        <div class="map-box">
+                            <img id="r-curr-map2" src="" class="map-img" alt="Mapa 2">
+                            <p id="r-curr-name2" class="map-name">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="next-section">
+                    <div class="proximo-tag" id="txt-next2"></div>
+                    <div class="nx-break"></div><div class="next-content-layout">
+                        <div class="next-rule-title" id="ranked-next-rule"></div>
+                        <div class="next-timer-hours"><span id="ranked-timer"></span></div>
+                        <div class="next-time-range" id="ranked-next-time-range"></div>
+                    </div>
+                    <div class="current-maps-grid">
+                        <div class="map-box">
+                            <img id="r-next-map1" src="" class="map-img" alt="Próx Mapa 1">
+                            <p id="r-next-name1" class="map-name">-</p>
+                        </div>
+                        <div class="map-box">
+                            <img id="r-next-map2" src="" class="map-img" alt="Próx Mapa 2">
+                            <p id="r-next-name2" class="map-name">-</p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-upcoming" onclick="openUpcomingModal('ranked')" id="txt-btn-upcoming-2">
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. COMBATE DE LIGA -->
+            <div class="splat-card card-pink">
+                <div class="hanger-hole"></div>
+                <div class="card-header-title">
+                    <img src="toreno.png" class="mode-icon" alt="Liga">
+                    <span id="txt-league-title"></span>
+                </div>
+
+                <div class="current-section">
+                    <div class="current-header">
+                        <span id="league-current-rule"></span>
+                        <span style="font-size: 0.9rem;" id="league-current-time"></span>
+                    </div>
+                    <div class="current-maps-grid">
+                        <div class="map-box">
+                            <img id="l-curr-map1" src="" class="map-img" alt="Mapa 1">
+                            <p id="l-curr-name1" class="map-name">-</p>
+                        </div>
+                        <div class="map-box">
+                            <img id="l-curr-map2" src="" class="map-img" alt="Mapa 2">
+                            <p id="l-curr-name2" class="map-name">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="next-section">
+                    <div class="proximo-tag" id="txt-next3"></div>
+                    <div class="nx-break"></div><div class="next-content-layout">
+                        <div class="next-rule-title" id="league-next-rule"></div>
+                        <div class="next-timer-hours"><span id="league-timer"></span></div>
+                        <div class="next-time-range" id="league-next-time-range"></div>
+                    </div>
+                    <div class="current-maps-grid">
+                        <div class="map-box">
+                            <img id="l-next-map1" src="" class="map-img" alt="Próx Mapa 1">
+                            <p id="l-next-name1" class="map-name">-</p>
+                        </div>
+                        <div class="map-box">
+                            <img id="l-next-map2" src="" class="map-img" alt="Próx Mapa 2">
+                            <p id="l-next-name2" class="map-name">-</p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-upcoming" onclick="openUpcomingModal('league')" id="txt-btn-upcoming-3">
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SALMON RUN -->
+        <div class="splat-card card-salmon">
+            <div class="hanger-hole"></div>
+
+            <div class="salmon-card-header">
+                <div class="card-header-title" style="margin: 0;">
+                    <img src="salmon-icon.png" class="mode-icon" alt="Salmon Run">
+                    <span id="txt-salmon-title"></span>
+                </div>
+            </div>
+            
+            <!-- SECCIÓN ACTUAL HORIZONTAL -->
+            <div class="next-section">
+                <div style="display: flex; gap: 12px; margin-bottom: 10px; align-items: baseline; flex-wrap: wrap;">
+                    <span class="proximo-tag" style="margin-bottom: 0;" id="txt-salmon-current"></span>
+<span id="salmon-time" style="font-weight: bold; text-shadow: 1px 1px 1px #000; font-size: 1.2rem; position: relative; top: 2px;"></span>
+                    <span id="salmon-restante" style="font-size: 1.1rem; color: #ffea00; flex-basis: 100%; margin-top: 2px;"></span>
+                </div>
+
+                <!-- VISTA CUANDO ESTÁ ABIERTO -->
+                <div class="salmon-current-horizontal" id="salmon-open-view">
+                    <div class="salmon-current-map-container">
+                        <img id="salmon-map-img" src="" class="salmon-current-map-img map-img" alt="Mapa Salmon Run" onclick="openLightbox(this.src, document.getElementById('salmon-map-name').innerText)">
+                        <p id="salmon-map-name" class="map-name"></p>
+                    </div>
+                    <div class="salmon-current-info">
+                        <p class="salmon-weapons-title" id="txt-weapons-label" style="margin: 0 0 4px 0; font-size: 0.95rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"></p>
+                        <div class="salmon-weapons-row">
+                            <div class="weapon-item"><img id="salmon-w1" src="" alt="W1"></div>
+                            <div class="weapon-item"><img id="salmon-w2" src="" alt="W2"></div>
+                            <div class="weapon-item"><img id="salmon-w3" src="" alt="W3"></div>
+                            <div class="weapon-item"><img id="salmon-w4" src="" alt="W4"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VISTA CUANDO ESTÁ CERRADO -->
+                <div id="salmon-closed-view" style="display: none; text-align: center; justify-content: center; align-items: center; margin: 10px 0 15px 0; width: 100%;">
+                    <img src="cerradito.png" alt="Cerrado" style="display: block; margin: 0 auto; max-width: 100%; width: 240px; height: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));">
+                </div>
+            </div>
+
+<!-- SECCIÓN PRÓXIMO (SIGUIENTE TURNO) -->
+            <div class="next-section" style="margin-bottom: 10px;">
+                <div style="display: flex; gap: 12px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; width: 100%;">
+                    <span class="proximo-tag" style="margin-bottom: 0;" id="txt-salmon-next"></span>
+                    <span id="salmon-next-time" style="font-weight: bold; text-shadow: 1px 1px 1px #000; font-size: 1.2rem;"></span>
+                    <span id="salmon-next-restante" style="font-size: 1.1rem; color: #ffea00; flex-basis: 100%; margin-top: 4px; text-shadow: 1px 1px 1px #000;"></span>
+                </div>
+                <div id="salmon-next-list" class="salmon-next-list" style="width: 100%;"></div>
+                
+                <button class="btn-upcoming" onclick="openUpcomingModal('salmon')" id="txt-btn-upcoming-salmon">
+                </button>
+            </div>
+
+    </div>
+
+    <footer class="nx-footer">
+        <p class="nx-footer-disc">
+            Ce site n'est pas affilié à Nintendo. Tous les noms de produits, logos et marques
+            appartiennent à leurs propriétaires respectifs.
+        </p>
+        <p class="nx-footer-credit">
+            Calendrier original par
+            <a href="https://github.com/darkaether-nova" target="_blank" rel="noopener">darkaether-nova</a>
+            &nbsp;·&nbsp; hébergé par <strong>Nextendo&nbsp;Network</strong>
+            &nbsp;·&nbsp; design repris de
+            <a href="https://splatoon2.ink" target="_blank" rel="noopener">splatoon2.ink</a>
+        </p>
+        <nav class="nx-footer-links">
+            <a href="https://nextendo.network" target="_blank" rel="noopener">Nextendo Network</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://discord.gg/XPfeCMwnzQ" target="_blank" rel="noopener">Discord</a>
+            <span aria-hidden="true">·</span>
+            <a href="https://github.com/NextendoNetwork" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+    </footer>
+
+    <div class="modal" id="upcomingModal">
+        <div class="modal-content" id="modalScrollContainer">
+            <h3 id="modal-upcoming-title"></h3>
+            <div id="modalListContainer" style="margin: 20px 0;"></div>
+            <button class="close-modal" onclick="closeUpcomingModal()" id="txt-modal-close"></button>
+        </div>
+    </div>
+
+    <script src="combates.js"></script>
+    <script src="salmon_rotations.js"></script>
+    
+    <script>
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('page-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 300);
+            }
+        });
+
+        const originalOpenModal = window.openUpcomingModal;
+        window.openUpcomingModal = function(mode) {
+            if (typeof originalOpenModal === 'function') {
+                originalOpenModal(mode);
+            }
+            const modalBox = document.getElementById('modalScrollContainer');
+            if (modalBox) {
+                modalBox.scrollTop = 0;
+            }
+        };
+
+        const observer = new MutationObserver((mutations) => {
+            const container = document.getElementById('modalListContainer');
+            if (container) {
+                const items = container.querySelectorAll('div:not(.modal-rotation-block)');
+                items.forEach(item => {
+                    if ((item.querySelector('img') || item.textContent.includes('a.m.') || item.textContent.includes('p.m.')) && !item.parentElement.classList.contains('modal-rotation-block')) {
+                        if(item.parentNode === container && !item.classList.contains('modal-rotation-block')) {
+                            item.classList.add('modal-rotation-block');
+                        }
+                    }
+                });
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('modalListContainer');
+            if (container) {
+                observer.observe(container, { childList: true, subtree: true });
+            }
+        });
+    </script>
+
+    <script>
+        (function () {
+            var wrap = document.getElementById('langSelector');
+            var sel = document.getElementById('languageSelect');
+            var btn = document.getElementById('langBtn');
+            var menu = document.getElementById('langMenu');
+            if (!wrap || !sel || !btn || !menu) return;
+            function close() { wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var open = wrap.classList.toggle('open');
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            });
+            menu.addEventListener('click', function (e) {
+                var li = e.target.closest('li[data-lang]');
+                if (!li) return;
+                sel.value = li.dataset.lang;
+                if (typeof changeLanguage === 'function') changeLanguage();
+                close();
+            });
+            document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) close(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+        })();
+    </script>
+
+    <div id="imgLightbox" onclick="closeImgLightbox()">
+        <img id="imgLightboxImg" src="" alt="">
+        <div id="imgLightboxCap"></div>
+    </div>
+</body>
+</html>
